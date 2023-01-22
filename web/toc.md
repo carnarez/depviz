@@ -1,0 +1,4 @@
+- [Home](/)
+- Visualise online
+    - [Hierarchical Edge Bundling](/hierarchical-edge-bundling)
+- [Utils](/utils) 
