@@ -22,14 +22,14 @@ RUN apt-get update \
 
 COPY . .
 
-#RUN git clone https://github.com/carnarez/depviz.git \
-# && mv depviz/utils . \
-# && rm -fr depviz \
-# && ( \
-#      cd utils \
-#      astdocs . > index.md \
-#    ) \
-RUN find . -name "*.md" | grep -e front-matter.md -e toc.md -v | while read f; do \
+RUN git clone https://github.com/carnarez/depviz.git \
+ && mv depviz/utils . \
+ && rm -fr depviz \
+ && ( \
+      cd utils \
+      astdocs . > index.md \
+    ) \
+ && find . -name "*.md" | grep -e front-matter.md -e toc.md -v | while read f; do \
       mkdir -p /var/www/`dirname $f`; \
       cat front-matter.md $f > /tmp/md; \
       mv /tmp/md $f; \

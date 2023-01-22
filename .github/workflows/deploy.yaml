@@ -53,6 +53,7 @@ jobs:
           (
             cp -r utils web
             cd web/utils
+            rm README.md
             ASTDOCS_WITH_LINENOS=1 astdocs . > index.md
             mv *.py ..
           )
@@ -81,7 +82,7 @@ jobs:
             python render.py --prefix=www \
                              --root=https://carnarez.github.io/depviz/ \
                              $(find . -name "*.md" | grep -e front-matter.md -e toc.md -v)
-            rm front-matter.* toc.* $(find . -name "README.*")
+            rm front-matter.* toc.*
             # bundle css
             cat style.css style-*.css | grep -v '@import ".*"' > www/style.css
             rm style.css style-*.css
