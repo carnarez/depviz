@@ -1,6 +1,3 @@
 - [Home](/)
-- Visualise online
-    - [Hierarchical Edge Bundling](/hierarchical-edge-bundling)
-- [Utils](/utils) 
-    - [csv_to_json](/utils#module-csv_to_json)
-    - [sql_to_json](/utils#module-sql_to_json)
+- [Hierarchical edge bundling](/hierarchical-edge-bundling)
+- [Tooling API](/utils) 

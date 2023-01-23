@@ -22,12 +22,14 @@ RUN apt-get update \
 
 COPY . .
 
-RUN git clone https://github.com/carnarez/depviz.git \
- && mv depviz/utils . \
+RUN git clone --filter=blob:none --quiet https://github.com/carnarez/depviz.git \
+ && mkdir utils \
+ && mv depviz/utils/*.py utils \
  && rm -fr depviz \
  && ( \
-      cd utils \
-      astdocs . > index.md \
+      cd utils; \
+      ASTDOCS_WITH_LINENOS=1 astdocs . > index.md; \
+      mv *.py ..; \
     ) \
  && find . -name "*.md" | grep -e front-matter.md -e toc.md -v | while read f; do \
       mkdir -p /var/www/`dirname $f`; \
