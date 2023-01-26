@@ -1,6 +1,6 @@
 import * as d3 from "https://cdn.skypack.dev/d3@7";
 
-// fetch common colour properties
+// fetch browser-calculated styling properties
 const computedStyle = window.getComputedStyle(document.documentElement);
 
 // https://observablehq.com/@d3/hierarchical-edge-bundling
@@ -8,7 +8,7 @@ const computedStyle = window.getComputedStyle(document.documentElement);
 const generateCircle = (
     data,
     {
-        nodeColor = "#000", // link color
+        nodeColor = "#000", // node color
         linkColor = "#000", // link color
         linkColorIncoming = "#07f", // link color for parents
         linkColorOutgoing = "#f77", // link color for children
@@ -257,7 +257,7 @@ const drawCircle = (data) => {
                 nodeColor: computedStyle.getPropertyValue("--font-color"),
                 linkColor: computedStyle.getPropertyValue("--font-color"),
                 linkColorIncoming: computedStyle.getPropertyValue("--link-color"),
-                width: window.innerWidth - 4*parseInt(computedStyle.fontSize),
+                width: window.innerWidth - 4*parseInt(computedStyle.fontSize), // does not account for scrollbar width
                 height: Math.max(window.innerHeight, 1200)
             }
         )
@@ -301,21 +301,23 @@ const toJSON = (rawData, inputFormat, reverseTree) => {
             let c = "", // child
                 p = ""; // parent
 
-            // parent -> child[ren]
+            // child -> parent[s]
             if (reverseTree) {
-                [c, p] = l.split(",");
+                [c, p] = l.split(",").map(o => o.trim());
             }
 
-            // child -> parent[s]
+            // parent -> child[ren]
             else {
-                [p, c] = l.split(",");
+                [p, c] = l.split(",").map(o => o.trim());
             }
 
             // build the json data
-            if (Object.keys(data).includes(p)) {
-                data[p].push(c);
-            } else {
-                data[p] = [c];
+            if (c && p && c.length && p.length) {
+                if (Object.keys(data).includes(p)) {
+                    data[p].push(c);
+                } else {
+                    data[p] = [c];
+                }
             }
 
         });
@@ -351,7 +353,7 @@ document.getElementById("depviz").innerHTML += `
 document.getElementById("depviz-button").addEventListener("click", (event) => {
     if (document.getElementById("depviz-circle")) {
 
-        // remove the circle data
+        // remove the circle
         document.getElementById("depviz-circle").remove();
 
         // reset the form
@@ -371,7 +373,7 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
         document.getElementById("depviz-form").innerHTML = "";
         document.getElementById("depviz-button").innerHTML = "Reset";
 
-        // draw the circle data
+        // draw the circle
         drawCircle(data);
 
     }

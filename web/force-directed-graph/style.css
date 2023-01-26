@@ -1,6 +1,7 @@
 article > * {
-  max-width: calc(100% - 2rem);
+  max-width: 100%;
   overflow-x: hidden;
+  padding: 0;
 }
 
 .depviz-buttons,
@@ -33,6 +34,7 @@ article > * {
   border-color: var(--link-color);
 }
 
+#depviz-form input[type=checkbox],
 #depviz-form input[type=radio] {
   appearance: none;
   background-color: transparent;
@@ -55,13 +57,26 @@ article > * {
   margin: 0 0.5rem 0 0;
 }
 
+#depviz-form input[type=checkbox]:checked + label,
 #depviz-form input[type=radio]:checked + label,
+#depviz-form input[type=checkbox]:not(checked) + label:hover,
 #depviz-form input[type=radio]:not(checked) + label:hover:before {
   opacity: 1;
 }
 
+#depviz-form input[type=checkbox]:not(checked) + label,
 #depviz-form input[type=radio]:not(checked) + label {
   opacity: 0.5;
+}
+
+#depviz-form input[type=checkbox]:checked + label::before {
+  color: var(--link-color);
+  content: "\f14a";
+}
+
+#depviz-form input[type=checkbox]:not(checked) + label::before {
+  color: var(--font-color);
+  content: "\f0c8";
 }
 
 #depviz-form input[type=radio]:checked + label::before {
