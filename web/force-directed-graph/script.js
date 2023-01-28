@@ -148,7 +148,7 @@ const generateGraph = (
           if (highlightedIncomingLinks.has(l) || highlightedOutgoingLinks.has(l)) {
               return 1;
           } else {
-              return 0.1;
+              return 0.3;
           }
       })
       .linkResolution(12)
@@ -247,15 +247,15 @@ const toJSON = (rawData, inputFormat, reverseTree) => {
                     data.nodes.push({"id": o2});
                 }
 
-                // parent -> child[ren]
-                if (reverseTree) {
-                    p = o1;
-                    c = o2;
-                }
                 // child -> parent[s]
-                else {
+                if (reverseTree) {
                     c = o1;
                     p = o2;
+                }
+                // parent -> child[ren]
+                else {
+                    p = o1;
+                    c = o2;
                 }
 
                 // add relationship between objects to the list of links

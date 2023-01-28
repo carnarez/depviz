@@ -273,7 +273,7 @@ const toJSON = (rawData, inputFormat, reverseTree) => {
     if (inputFormat === "json") {
         const jsonData = JSON.parse(rawData);
 
-        // parent -> child[ren]
+        // child -> parent[s]
         if (reverseTree) {
 
             // build the json data
@@ -288,7 +288,7 @@ const toJSON = (rawData, inputFormat, reverseTree) => {
             });
         }
 
-        // child -> parent[s] (nothing to do)
+        // parent -> child[ren] (nothing to do)
         else {
             return jsonData;
         }

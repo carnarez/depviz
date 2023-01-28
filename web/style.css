@@ -13,6 +13,7 @@ article > * {
   width: 100%;
 }
 
+#depviz,
 .depviz-buttons,
 #depviz-form {
   text-align: center;
