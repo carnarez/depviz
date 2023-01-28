@@ -23,7 +23,7 @@ to plot such networks.
 
 #### Visualisation options
 
-##### [Directed acyclic graph](/directed-acyclic-graph)
+##### [Directed acyclic graph](/directed-acyclic-graph) (WIP)
 
 Also called _Sugiyama_ after the author of the original publication solving the layout
 optimization problem back in the days. [^3]
@@ -52,6 +52,39 @@ author of [_From Data to Viz_](https://www.data-to-viz.com/): [^4]
 > decrease the clutter usually observed in complex networks.
 
 Well said.
+
+#### Input formats
+
+Most of these litle tools accept data in the following formats:
+
+* CSV in which each line carries a pair of `parent,child` or `child,parent`:
+  ```csv
+  parent,child
+  parent,child
+  ...
+  ```
+* JSON in which a list of children is provided for each parent, or a list of parents for
+  each child:
+  ```json
+  {
+    parent: [
+      child,
+      child,
+      ...
+    ],
+    parent : [
+      ...
+    ],
+    ...
+  }
+  ```
+
+Look for the buttons to precise which input format is provided to avoid mix up in the
+colour coding. And let's keep it consistent, no mixing between the formats in the same
+file.
+
+Most of these representation colour parent link(s) / node(s) in blue, and child link(s)
+/ node(s) in red.
 
 #### [Tooling](/utils)
 
