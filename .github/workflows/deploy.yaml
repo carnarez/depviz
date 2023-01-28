@@ -80,7 +80,8 @@ jobs:
             # convert markdown to html
             wget $url/build/render.py
             wget $url/build/template.html
-            python render.py --prefix=/tmp/www \
+            python render.py --meta="splash=nosplash" \
+                             --prefix=/tmp/www \
                              --root=https://carnarez.github.io/depviz/ \
                              $(find . -name "*.md" | grep -v toc.md)
             rm toc.md
