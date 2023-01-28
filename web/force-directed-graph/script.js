@@ -131,7 +131,7 @@ const generateGraph = (
                   n, highlightedIncomingNodes, highlightedOutgoingNodes
               );
           })
-          .nodeLabel(n => n.id)
+          .nodeLabel(n => `<span class="depviz-labels">${n.id}</span>`)
           .nodeOpacity(1)
           .nodeResolution(16);
 
@@ -329,7 +329,9 @@ document.getElementById("depviz").innerHTML += `
   <label for="depviz-vanilla">child &rarr; parents</label>
   <input id="depviz-labels" type="checkbox">
   <label for="depviz-labels">Labels</label>
-  <div class="depviz-buttons"><a id="depviz-button">Submit</a></div>
+</div>
+<div class="depviz-buttons">
+  <a id="depviz-button">Submit</a>
 </div>
 `;
 
@@ -349,11 +351,16 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
     };
 
     // remove the form and all other bottom stuff
-    document.getElementById("depviz").style.margin = 0;
-    document.getElementById("depviz-form").style.display = "none";
-    document.querySelectorAll("article > :not(.maintext)").forEach(e => {
+    document.querySelectorAll("article > *:not(.maintext)").forEach(e => {
         e.style.display = "none";
     });
+    document.querySelectorAll(".maintext > *:not(#depviz)").forEach(e => {
+        e.style.display = "none";
+    });
+    document.querySelectorAll("#depviz > *:not(#depviz-graph)").forEach(e => {
+        e.style.display = "none";
+    });
+    document.getElementById("depviz").style.margin = 0;
 
     // draw the graph
     drawGraph(data, opts);

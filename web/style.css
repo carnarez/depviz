@@ -1,10 +1,11 @@
 article > * {
-  max-width: calc(100% - 2rem);
+  max-width: 100%;
   overflow-x: hidden;
+  padding: 0;
 }
 
-.depviz-buttons,
-#depviz-form,
+#depviz > *:not(#depviz-graph),
+.maintext > *:not(#depviz),
 .prevnext {
   margin: 0 auto;
   max-width: var(--max-width);
@@ -17,7 +18,7 @@ article > * {
   text-align: center;
 }
 
-.depviz-buttons a  {
+.depviz-buttons a {
   background-color: var(--background-color-alt);
   border-color: transparent;
   border-radius: 2rem;
@@ -33,6 +34,7 @@ article > * {
   border-color: var(--link-color);
 }
 
+#depviz-form input[type=checkbox],
 #depviz-form input[type=radio] {
   appearance: none;
   background-color: transparent;
@@ -55,13 +57,26 @@ article > * {
   margin: 0 0.5rem 0 0;
 }
 
+#depviz-form input[type=checkbox]:checked + label,
 #depviz-form input[type=radio]:checked + label,
-#depviz-form input[type=radio]:not(checked) + label:hover:before {
+#depviz-form input[type=checkbox]:not(checked) + label:hover,
+#depviz-form input[type=radio]:not(checked) + label:hover {
   opacity: 1;
 }
 
+#depviz-form input[type=checkbox]:not(checked) + label,
 #depviz-form input[type=radio]:not(checked) + label {
   opacity: 0.5;
+}
+
+#depviz-form input[type=checkbox]:checked + label::before {
+  color: var(--link-color);
+  content: "\f14a";
+}
+
+#depviz-form input[type=checkbox]:not(checked) + label::before {
+  color: var(--font-color);
+  content: "\f0c8";
 }
 
 #depviz-form input[type=radio]:checked + label::before {

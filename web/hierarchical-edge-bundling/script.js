@@ -5,7 +5,7 @@ const computedStyle = window.getComputedStyle(document.documentElement);
 
 // https://observablehq.com/@d3/hierarchical-edge-bundling
 // below are the default options for to render the circle
-const generateCircle = (
+const generateGraph = (
     data,
     {
         nodeColor = "#000", // node color
@@ -199,7 +199,7 @@ const generateCircle = (
 
     // svg canvas
     const svg = d3.create("svg")
-      .attr("id", "depviz-circle")
+      .attr("id", "depviz-graph")
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [-width / 2, -height / 2, width, height]);
@@ -247,11 +247,11 @@ const generateCircle = (
 }
 
 // process the posted data and draw the svg
-const drawCircle = (data) => {
+const drawGraph = (data) => {
 
     // add the graph to the page
     document.getElementById("depviz").appendChild(
-        generateCircle(
+        generateGraph(
             data,
             {
                 nodeColor: computedStyle.getPropertyValue("--font-color"),
@@ -346,15 +346,17 @@ const form = `
 // add the initial form to the page
 document.getElementById("depviz").innerHTML += `
 <div id="depviz-form">${form}</div>
-<div class="depviz-buttons"><a id="depviz-button">Submit</a></div>
+<div class="depviz-buttons">
+  <a id="depviz-button">Submit</a>
+</div>
 `;
 
 // event listener
 document.getElementById("depviz-button").addEventListener("click", (event) => {
-    if (document.getElementById("depviz-circle")) {
+    if (document.getElementById("depviz-graph")) {
 
         // remove the circle
-        document.getElementById("depviz-circle").remove();
+        document.getElementById("depviz-graph").remove();
 
         // reset the form
         document.getElementById("depviz-form").innerHTML = form;
@@ -374,7 +376,7 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
         document.getElementById("depviz-button").innerHTML = "Reset";
 
         // draw the circle
-        drawCircle(data);
+        drawGraph(data);
 
     }
 });

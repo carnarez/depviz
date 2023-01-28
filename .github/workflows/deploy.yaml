@@ -33,14 +33,15 @@ jobs:
 
       - name: Install Python dependencies
         run: |
+          url=git+https://github.com/carnarez
           python -m pip install --upgrade pip
           python -m pip install --no-cache-dir \
             ghp-import \
-            git+https://github.com/carnarez/astdocs@master \
-            git+https://github.com/carnarez/markdown-astdocs@master \
-            git+https://github.com/carnarez/markdown-img@master \
-            git+https://github.com/carnarez/markdown-insert@master \
-            git+https://github.com/carnarez/markdown-script@master \
+            $url/astdocs@master \
+            $url/markdown-astdocs@master \
+            $url/markdown-img@master \
+            $url/markdown-insert@master \
+            $url/markdown-script@master \
             jinja2 \
             lunr \
             markdown \
@@ -65,10 +66,10 @@ jobs:
             # where to find the templates (base url)
             url=https://raw.githubusercontent.com/carnarez/markdown-render/master
             # download the stylesheets
-            wget $url/style/style.css
-            wget $url/style/style-highlight.css
-            wget $url/style/style-markdown.css
-            wget $url/style/style-search.css
+            wget $url/style/style.css -O _style.css
+            wget $url/style/style-highlight.css -O _style-highlight.css
+            wget $url/style/style-markdown.css -O _style-markdown.css
+            wget $url/style/style-search.css -O _style-search.css
             # prepare markdown files
             find . -name "*.md" | grep -e front-matter.md -e toc.md -v | while read f; do
               mkdir -p /tmp/www/$(dirname $f)
@@ -86,8 +87,10 @@ jobs:
             # modify html links
             sed -i 's|href=\"/|href=\"/depviz/|g;s|src=\"/|src=\"/depviz/|g' $(find /tmp/www -name "*.html")
             # prepare css files
-            cat style.css style-*.css | grep -v '@import ".*"' > /tmp/www/style.css
-            rm style.css style-*.css
+            cat _style.css _style-*.css | grep -v '@import ".*"' > _bundle.css
+            rm _style.css _style-*.css
+            cat *.css > /tmp/www/style.css
+            rm *.css
             find . -name "*.css" | while read f; do
               cp $f /tmp/www/$(dirname $f)
             done
