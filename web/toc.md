@@ -1,5 +1,5 @@
 - [Home](/)
 - [Directed acyclic graph](/directed-acyclic-graph)
-- [Force-directed grap](/force-directed-graph)
+- [Force-directed graph](/force-directed-graph)
 - [Hierarchical edge bundling](/hierarchical-edge-bundling)
 - [Tooling API](/utils) 
