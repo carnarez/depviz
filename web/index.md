@@ -55,31 +55,33 @@ Well said.
 
 #### Input formats
 
-Most of these litle tools accept data in the following formats:
+Most of these litle tools accept data in the following formats: CSV in which each line
+carries a pair of `parent,child` or `child,parent`:
 
-* CSV in which each line carries a pair of `parent,child` or `child,parent`:
-  ```csv
-  parent,child
-  parent,child
-  ...
-  ```
-* JSON in which a list of children is provided for each parent, or a list of parents for
-  each child:
-  ```json
-  {
-    parent: [
-      child,
-      child,
-      ...
-    ],
-    parent : [
-      ...
-    ],
+```csv
+parent,child
+parent,child
+...
+```
+
+or JSON in which a list of children is provided for each parent, or a list of parents
+for each child:
+
+```json
+{
+  parent: [
+    child,
+    child,
     ...
-  }
-  ```
+  ],
+  parent : [
+    ...
+  ],
+  ...
+}
+```
 
-Look for the buttons to precise which input format is provided to avoid mix up in the
+Look for the buttons to precise which input format is provided to avoid swaping up the
 colour coding. And let's keep it consistent, no mixing between the formats in the same
 file.
 
@@ -96,6 +98,8 @@ expect. Run via:
 $ make env
 > python utils/csv_to_json.py <CSV FILE>  # for instance
 ```
+
+Again, this works for _me_ and my current projects! No other claims nor guarantees. 
 
 [^1]: Here is a [link](https://aws.amazon.com/redshift/) to avoid lawsuits; not an
       advertisement though, simply what I am currently working with.
