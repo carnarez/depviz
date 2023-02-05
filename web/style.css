@@ -109,3 +109,7 @@ article > * {
   color: var(--font-color);
   opacity: 0.5;
 }
+
+#depviz-form textarea.error {
+  border-color: #ff7777;
+}

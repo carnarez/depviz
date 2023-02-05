@@ -308,7 +308,11 @@ const toJSON = (rawData, inputFormat, reverseTree) => {
         });
     }
 
-    return data;
+    if (Object.keys(data).length === 0) {
+        throw "InputError";
+    } else {
+        return data;
+    }
 }
 
 // add the form to the page
@@ -337,32 +341,39 @@ document.getElementById("depviz").innerHTML += `
 
 // event listener
 document.getElementById("depviz-button").addEventListener("click", (event) => {
+    try {
 
-    // convert to input expected by the rendering function
-    const data = toJSON(
-        document.getElementById("depviz-raw").value,
-        (document.getElementById("depviz-json").checked) ? "json" : "csv",
-        (document.getElementById("depviz-reverse").checked) ? true : false
-    );
+        // convert to input expected by the rendering function
+        const data = toJSON(
+            document.getElementById("depviz-raw").value,
+            (document.getElementById("depviz-json").checked) ? "json" : "csv",
+            (document.getElementById("depviz-reverse").checked) ? true : false
+        );
 
-    // gather option values
-    const opts = {
-        "withLabels": document.getElementById("depviz-labels").checked
-    };
+        // draw the graph
+        drawGraph(data, opts);
 
-    // remove the form and all other bottom stuff
-    document.querySelectorAll("article > *:not(.maintext)").forEach(e => {
-        e.style.display = "none";
-    });
-    document.querySelectorAll(".maintext > *:not(#depviz)").forEach(e => {
-        e.style.display = "none";
-    });
-    document.querySelectorAll("#depviz > *:not(#depviz-graph)").forEach(e => {
-        e.style.display = "none";
-    });
-    document.getElementById("depviz").style.margin = 0;
+        // gather option values
+        const opts = {
+            "withLabels": document.getElementById("depviz-labels").checked
+        };
 
-    // draw the graph
-    drawGraph(data, opts);
+        // remove the form and all other bottom stuff
+        document.querySelectorAll("article > *:not(.maintext)").forEach(e => {
+            e.style.display = "none";
+        });
+        document.querySelectorAll(".maintext > *:not(#depviz)").forEach(e => {
+            e.style.display = "none";
+        });
+        document.querySelectorAll("#depviz > *:not(#depviz-graph)").forEach(e => {
+            e.style.display = "none";
+        });
+        document.getElementById("depviz").style.margin = 0;
 
+    } catch(e) {
+
+        // highlight the textarea
+        document.getElementById("depviz-raw").classList.add("error");
+
+    }
 });

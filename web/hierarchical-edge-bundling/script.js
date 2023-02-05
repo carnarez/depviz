@@ -323,7 +323,11 @@ const toJSON = (rawData, inputFormat, reverseTree) => {
         });
     }
 
-    return data;
+    if (Object.keys(data).length === 0) {
+        throw "InputError";
+    } else {
+        return data;
+    }
 }
 
 // define the form elements
@@ -363,20 +367,27 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
         document.getElementById("depviz-button").innerHTML = "Submit";
 
     } else {
+        try {
 
-        // convert to input expected by the rendering function
-        const data = toJSON(
-            document.getElementById("depviz-raw").value,
-            (document.getElementById("depviz-json").checked) ? "json" : "csv",
-            (document.getElementById("depviz-reverse").checked) ? true : false
-        );
+            // convert to input expected by the rendering function
+            const data = toJSON(
+                document.getElementById("depviz-raw").value,
+                (document.getElementById("depviz-json").checked) ? "json" : "csv",
+                (document.getElementById("depviz-reverse").checked) ? true : false
+            );
 
-        // remove the form
-        document.getElementById("depviz-form").innerHTML = "";
-        document.getElementById("depviz-button").innerHTML = "Reset";
+            // draw the circle
+            drawGraph(data);
 
-        // draw the circle
-        drawGraph(data);
+            // remove the form
+            document.getElementById("depviz-form").innerHTML = "";
+            document.getElementById("depviz-button").innerHTML = "Reset";
 
+        } catch(e) {
+
+            // highlight the textarea
+            document.getElementById("depviz-raw").classList.add("error");
+
+        }
     }
 });
