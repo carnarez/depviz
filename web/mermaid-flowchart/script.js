@@ -227,7 +227,6 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
             document.getElementById("depviz-button").innerHTML = "Reset";
 
         } catch(e) {
-            console.log(e);
 
             // highlight the textarea
             document.getElementById("depviz-raw").classList.add("error");
