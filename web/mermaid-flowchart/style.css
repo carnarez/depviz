@@ -1,3 +1,18 @@
+article > * {
+  max-width: 100%;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+#depviz > *:not(#depviz-graph),
+.maintext > *:not(#depviz),
+.prevnext {
+  margin: 0 auto;
+  max-width: var(--max-width);
+  padding: 1rem;
+  width: 100%;
+}
+
 #mermaid-diagram {
     margin: 2rem auto 0 auto;
 }

@@ -12,11 +12,3 @@ article > * {
   padding: 1rem;
   width: 100%;
 }
-
-.depviz-labels {
-  background-color: var(--background-color);
-  color: var(--font-color);
-  font-family: var(--font-family);
-  opacity: 0.9;
-  padding: 0.25rem;
-}
