@@ -1,27 +1,37 @@
-"""Extract objects and their parents from SQL statements.
+"""Extract upstream dependencies from SQL files, each containing a single query.
 
 Parameters
 ----------
 : str
-    Path to the SQL script, containing more than one SQL statement.
+    Path to the SQL script(s), each containing a _singled out_ SQL query.
 
 Returns
 -------
 : str
-    JSON-formatted, nested list of object and dependencies.
+    JSON-formatted, nested list of objects and associated list of upstream dependencies.
+    One can see this object as child -> list of parents.
 
 Usage
 -----
 ```shell
 $ python script.py <SQL FILE> [<SQL FILE> [...]]
+$ python script.py <SQL FILE> [<SQL FILE> [...]] --pretty
 ```
 
 Example
 -------
 ```shell
-$ python script.py views.sql
+$ python script.py view.sql --pretty
 $ python script.py fact_*.sql dim_*.sql
 ```
+
+Note
+----
+* Only a few SQL statements amongst the gazillions ways to write them are supported;
+  feel free to drop a message with a new one to test.
+* This is based on queries running on `Redshift`, no guarantees this would work on any
+  other syntax (but `Redshift` is largely based on `PostgreSQL`, there's hope).
+* This little stunt is still in alpha, and a lot more testing is required!
 """
 
 import json
@@ -72,67 +82,173 @@ def clean_query(query: str) -> str:
     q = re.sub(r"(.*)\s*=\s*(.*)", r"\1 = \2", q)
     q = re.sub(r"(.*)\s*\|\|\s*(.*)", r"\1 || \2", q)
     q = re.sub(r"(.*)\s*::\s*(.*)", r"\1::\2", q)
-    q = re.sub(r"[\s]+", " ", q).strip()
+    q = re.sub(r"[\s]+", " ", q)
+    q = q.strip()
 
     return q
 
 
-def fetch_objects(query: str, objects: dict[str, list[str]]) -> tuple[str, list[str]]:
-    r"""Extract materialized view object and its dependencies from a SQL statement.
+def split_query(query: str) -> dict[str, list[str]]:
+    r"""Split a query in its subqueries, if any.
 
     Parameters
     ----------
     query : str
         The DDL to parse.
-    objects : dict[str, list[str]]
-        List of objects and parents already parsed.
 
     Returns
     -------
     : dict[str, list[str]]
-        Updated list of objects and children.
+        Dictionary of [sub]queries and associated DDL, split in parts if the `union`
+        keyword is found.
 
     Notes
     -----
-    1. Only materialized views are checked.
-    2. Supported SQL statements and associated regular expressions:
-        * `CREATE\s+[A-Za-z]*\s+MATERIALIZED\s+VIEW\s+([^(].*?)\s``
-        * `FROM\s+(\S+rated\.[^(\s;)]+)`
-        * `JOIN\s+(\S+rated\.[^(\s;)]+)`
+    Processing goes as follows:
+
+    1. Search for `... as ( select ... )` CTE statement via the
+       `[^\s]+\s+AS\s+\(\s+SELECT` regular expression.
+    2. Read each character from there, keeping count of opening/closing brackets; once
+       this number reaches zero (or we seeked to end of the query) we are done with the
+       subquery.
+    3. Store the subquery (split on the `UNION` keyword, if any) under the CTE name.
+    4. Move on to the next subquery.
+    5. Extract the main query, if any, using the following regular expressions (these
+       could be factored a bit further but clarity prevails):
+        * `CREATE\s+EXTERNAL\s+TABLE\s+([^\s]+)`
+        * `CREATE\s+TABLE\s([^\s]+)`
+        * `CREATE\s+MATERIALIZED\s+VIEW\s([^\s]+)`
+        * `CREATE\+OR\s+REPLACE\s+VIEW\s([^\s]+)`
+        * `CREATE\s+VIEW\s([^\s]+)`
     """
-    cr = r"create\s+materialized\s+view\s+([^(].*?)\s"
-    pr = (r"from\s+(\S+rated\.[^(\s;)]+)", r"join\s+(\S+rated\.[^(\s;)]+)")
+    parts: dict[str, list[str]] = {}
 
-    # current object
-    if (m := re.search(cr, query)) is not None:
-        c = m.group(1)
+    # extract subqueries
+    n = len(query) + 1
+    while n != len(query):
+        n = len(query)
 
-        # parent object(s)
-        p = []
-        for r in pr:
-            for m in re.finditer(r, query):
-                if (o := m.group(1)) not in p:
-                    p.append(o)
+        # find a match
+        if (m := re.search(r"([^\s]+)(\s+as\s+)(\(\s+select)", query)) is not None:
+            n = m.group(1)  # name of the cte
+            i = m.end(2)  # start of the subquery
+            b = 0  # number of open brackets
+            s = ""  # stored characters
 
-        # store the object
-        for o in p:
-            if o not in objects:
-                objects[o] = [c]
+            read = True  # store the characters until false
+            while read:
+
+                # count opening/closing brackets; if counts reaches 0 we are done
+                if query[i] == "(":
+                    b += 1
+                if query[i] == ")":
+                    b -= 1
+                    if b == 0:
+                        read = False
+
+                # end of the query
+                try:
+                    s += query[i]
+                except IndexError:
+                    read = False
+
+                # iterate
+                i += 1
+
+            # save the part(s)
+            if re.search(r"from\s+\(\s+select", s) is not None:
+                parts[n] = [s.strip().lstrip("(").rstrip(")").strip()]
             else:
-                objects.append(c)
+                parts[n] = list(
+                    map(
+                        str.strip,
+                        re.split(r"union[ all]*", s.strip().lstrip("(").rstrip(")")),
+                    )
+                )
 
-    return objects
+            # remove the part(s) from the query and iterate
+            query = query.replace(f"{n}{m.group(2)}{s}", f"%SUBQUERY:{n}%", 1)
+
+    # remove column selection
+    for m in re.finditer(r"select\s+(.*?)\s+from\s+[^\s(]+", query):
+        query = query.replace(m.group(1), "%COLUMNS%")
+
+    # extract main query, if any (if the query does not generate any object, this step
+    # returns nothing)
+    for r in (
+        r"create\s+external\s+table\s+([^\s]+)",
+        r"create\s+table\s([^\s]+)",
+        r"create\s+materialized\s+view\s([^\s]+)",
+        r"create\+or\s+replace\s+view\s([^\s]+)",
+        r"create\s+view\s([^\s]+)",
+    ):
+        if (m := re.search(r, query, flags=re.IGNORECASE)) is not None:
+            parts[m.group(1)] = list(map(str.strip, re.split(r"union[ all]*", query)))
+            break
+
+    # debug
+    # print(query)
+
+    return parts
+
+
+def fetch_dependencies(parts: dict[str, list[str]]) -> dict[str, list[str]]:
+    r"""Fetch upstream dependencies from each subquery.
+
+    Parameters
+    ----------
+    : dict[str, list[str]]
+        Dictionary of [sub]queries and associated DDL.
+
+    Returns
+    -------
+    : dict[str, list[str]]
+        Dictionary of objects and associated list of upstream dependencies.
+
+    Notes
+    -----
+    Supported regular expressions (_e.g._, SQL statements):
+
+    1. `FROM\s+([^\s(]+)`
+    2. `JOIN\s+([^\s(]+)`
+    3. `LOCATION\s+'(s3://.+)'` (`Redshift` stuff)
+    """
+    tree: dict[str, list[str]] = {}
+
+    # iterate over each object -> associated subqueries
+    for n, p in parts.items():
+        for q in p:
+            if any([f" {s} " in q.lower() for s in ("from", "join", "location")]):
+                for r in (r"from\s+([^\s(]+)", r"join\s+([^\s(]+)", r"location\s+'(s3://.+)'"):
+                    for m in re.finditer(r, q, flags=re.IGNORECASE):
+                        if n in tree:
+                            if m.group(1) not in tree[n]:
+                                tree[n].append(m.group(1))
+                        else:
+                            tree[n] = [m.group(1)]
+            else:
+                tree[n] = []
+
+    return tree
 
 
 if __name__ == "__main__":
     o: dict[str, list[str]] = {}
 
+    # command line argument
+    if "--pretty" in sys.argv:
+        sys.argv.remove("--pretty")
+        indent = 4
+    else:
+        indent = None
+
     # parse each statement in each script provided
     for a in sys.argv[1:]:
         with open(a) as f:
-            for s in sqlparse.split(f.read()):
-                q = clean_query(s)
-                o = fetch_objects(q, o)
+            for q in sqlparse.split(f.read()):
+                q = clean_query(q)
+                p = split_query(q)
+                t = fetch_dependencies(p)
 
-    # output
-    print(json.dumps(o))
+            # output
+            print(json.dumps(t, indent=indent))

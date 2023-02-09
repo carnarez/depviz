@@ -1,14 +1,15 @@
 # Module `csv_to_json`
 
-Extract objects and their parents from SQL statements.
+Build an object -> upstream dependencies JSON object from CSV content.
 
 **Parameters**
 
-- \[`str`\]: Path to the CSV file.
+- \[`str`\]: Path to the CSV file(s).
 
 **Returns**
 
-- \[`str`\]: JSON-formatted, nested list of object and dependencies.
+- \[`str`\]: JSON-formatted, nested list of object and upstream dependencies (objects
+  that are depended on).
 
 **Usage**
 
@@ -19,8 +20,8 @@ $ python script.py <CSV FILE> [<CSV FILE> [...]]
 **Example**
 
 ```shell
-$ python script.py dependencies.sql
-$ python script.py deps-dev.csv deps-prd.csv
+$ python script.py dependencies.csv
+$ python script.py file1.csv file2.csv file3.csv
 ```
 
 **Functions**
@@ -40,46 +41,60 @@ Convert the CSV content to JSON.
 **Parameters**
 
 - `content` \[`str`\]: The CSV content to parse and convert.
-- `objects` \[`dict[str, list[str]]`\]: List of objects and parents already parsed.
+- `objects` \[`dict[str, list[str]]`\]: Dictionary of objects already parsed.
 
 **Returns**
 
-- \[`dict[str, list[str]]`\]: Updated list of objects and children.
+- \[`dict[str, list[str]]`\]: Updated dictionary of objects and upstream dependencies.
 
 **Notes**
 
-Expects a two columns dataset, each line embedding a `child,parent` pair.
+Expects a two columns dataset, each line embedding a `object1,object2` pair; the second
+object is expected to be depended upon.
+
+# Module `filter_json`
 
 # Module `sql_to_json`
 
-Extract objects and their parents from SQL statements.
+Extract upstream dependencies from SQL files, each containing a single query.
 
 **Parameters**
 
-- \[`str`\]: Path to the SQL script, containing more than one SQL statement.
+- \[`str`\]: Path to the SQL script(s), each containing a _singled out_ SQL query.
 
 **Returns**
 
-- \[`str`\]: JSON-formatted, nested list of object and dependencies.
+- \[`str`\]: JSON-formatted, nested list of objects and associated list of upstream
+  dependencies. One can see this object as child -> list of parents.
 
 **Usage**
 
 ```shell
 $ python script.py <SQL FILE> [<SQL FILE> [...]]
+$ python script.py <SQL FILE> [<SQL FILE> [...]] --pretty
 ```
 
 **Example**
 
 ```shell
-$ python script.py views.sql
+$ python script.py view.sql --pretty
 $ python script.py fact_*.sql dim_*.sql
 ```
+
+**Note**
+
+- Only a few SQL statements amongst the gazillions ways to write them are supported;
+  feel free to drop a message with a new one to test.
+- This is based on queries running on `Redshift`, no guarantees this would work on any
+  other syntax (but `Redshift` is largely based on `PostgreSQL`, there's hope).
+- This little stunt is still in alpha, and a lot more testing is required!
 
 **Functions**
 
 - [`clean_query()`](#sql_to_jsonclean_query): Deep-cleaning of a SQL query via
-- [`fetch_objects()`](#sql_to_jsonfetch_objects): Extract materialized view object and
-  its dependencies from a SQL statement.
+- [`split_query()`](#sql_to_jsonsplit_query): Split a query in its subqueries, if any.
+- [`fetch_dependencies()`](#sql_to_jsonfetch_dependencies): Fetch upstream dependencies
+  from each subquery.
 
 ## Functions
 
@@ -116,27 +131,62 @@ and regular expressions.
      operators;
    - `"[\s]+"` -> `" "`: replace multiple spaces by single spaces.
 
-### `sql_to_json.fetch_objects`
+### `sql_to_json.split_query`
 
 ```python
-fetch_objects(query: str, objects: dict[str, list[str]]) -> tuple[str, list[str]]:
+split_query(query: str) -> dict[str, list[str]]:
 ```
 
-Extract materialized view object and its dependencies from a SQL statement.
+Split a query in its subqueries, if any.
 
 **Parameters**
 
 - `query` \[`str`\]: The DDL to parse.
-- `objects` \[`dict[str, list[str]]`\]: List of objects and parents already parsed.
 
 **Returns**
 
-- \[`dict[str, list[str]]`\]: Updated list of objects and children.
+- \[`dict[str, list[str]]`\]: Dictionary of \[sub\]queries and associated DDL, split in
+  parts if the `union` keyword is found.
 
 **Notes**
 
-1. Only materialized views are checked.
-1. Supported SQL statements and associated regular expressions:
-   - \`CREATE\\s+\[A-Za-z\]*\\s+MATERIALIZED\\s+VIEW\\s+(\[^(\].*?)\\s\`\`
-   - `FROM\s+(\S+rated\.[^(\s;)]+)`
-   - `JOIN\s+(\S+rated\.[^(\s;)]+)`
+Processing goes as follows:
+
+1. Search for `... as ( select ... )` CTE statement via the `[^\s]+\s+AS\s+\(\s+SELECT`
+   regular expression.
+1. Read each character from there, keeping count of opening/closing brackets; once this
+   number reaches zero (or we seeked to end of the query) we are done with the subquery.
+1. Store the subquery (split on the `UNION` keyword, if any) under the CTE name.
+1. Move on to the next subquery.
+1. Extract the main query, if any, using the following regular expressions (these could
+   be factored a bit further but clarity prevails):
+   - `CREATE\s+EXTERNAL\s+TABLE\s+([^\s]+)`
+   - `CREATE\s+TABLE\s([^\s]+)`
+   - `CREATE\s+MATERIALIZED\s+VIEW\s([^\s]+)`
+   - `CREATE\+OR\s+REPLACE\s+VIEW\s([^\s]+)`
+   - `CREATE\s+VIEW\s([^\s]+)`
+
+### `sql_to_json.fetch_dependencies`
+
+```python
+fetch_dependencies(parts: dict[str, list[str]]) -> dict[str, list[str]]:
+```
+
+Fetch upstream dependencies from each subquery.
+
+**Parameters**
+
+- \[`dict[str, list[str]]`\]: Dictionary of \[sub\]queries and associated DDL.
+
+**Returns**
+
+- \[`dict[str, list[str]]`\]: Dictionary of objects and associated list of upstream
+  dependencies.
+
+**Notes**
+
+Supported regular expressions (_e.g._, SQL statements):
+
+1. `FROM\s+([^\s(]+)`
+1. `JOIN\s+([^\s(]+)`
+1. `LOCATION\s+'(s3://.+)'` (`Redshift` stuff)
