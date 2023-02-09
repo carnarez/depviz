@@ -1,0 +1,37 @@
+#mermaid-diagram {
+    margin: 2rem auto 0 auto;
+}
+
+#depviz-form input[type=radio]#depviz-lr + label {
+  margin: 0 0 0 1rem;
+}
+
+#depviz-form input[type=radio]#depviz-tb + label,
+#depviz-form input[type=radio]#depviz-rl + label,
+#depviz-form input[type=radio]#depviz-bt + label {
+  margin: 0;
+}
+
+#depviz-form input[type=radio]#depviz-lr + label::before,
+#depviz-form input[type=radio]#depviz-tb + label::before,
+#depviz-form input[type=radio]#depviz-rl + label::before,
+#depviz-form input[type=radio]#depviz-bt + label::before {
+  font-weight: 900;
+  margin: 0 0.25rem 0 0;
+}
+
+#depviz-form input[type=radio]#depviz-lr + label::before {
+  content: "\f061";
+}
+
+#depviz-form input[type=radio]#depviz-tb + label::before {
+  content: "\f063";
+}
+
+#depviz-form input[type=radio]#depviz-rl + label::before {
+  content: "\f060";
+}
+
+#depviz-form input[type=radio]#depviz-bt + label::before {
+  content: "\f062";
+}
