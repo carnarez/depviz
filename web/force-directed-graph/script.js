@@ -350,13 +350,13 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
             (document.getElementById("depviz-reverse").checked) ? true : false
         );
 
-        // draw the graph
-        drawGraph(data, opts);
-
         // gather option values
         const opts = {
             "withLabels": document.getElementById("depviz-labels").checked
         };
+
+        // draw the graph
+        drawGraph(data, opts);
 
         // remove the form and all other bottom stuff
         document.querySelectorAll("article > *:not(.maintext)").forEach(e => {
