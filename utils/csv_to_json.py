@@ -1,14 +1,15 @@
-"""Extract objects and their parents from SQL statements.
+"""Build an object -> upstream dependencies JSON object from CSV content.
 
 Parameters
 ----------
 : str
-    Path to the CSV file.
+    Path to the CSV file(s).
 
 Returns
 -------
 : str
-    JSON-formatted, nested list of object and dependencies.
+    JSON-formatted, nested list of object and upstream dependencies (objects that are
+    depended on).
 
 Usage
 -----
@@ -19,8 +20,8 @@ $ python script.py <CSV FILE> [<CSV FILE> [...]]
 Example
 -------
 ```shell
-$ python script.py dependencies.sql
-$ python script.py deps-dev.csv deps-prd.csv
+$ python script.py dependencies.csv
+$ python script.py file1.csv file2.csv file3.csv
 ```
 """
 
@@ -36,22 +37,23 @@ def convert_csv(content: str, objects: dict[str, list[str]]) -> tuple[str, list[
     content : str
         The CSV content to parse and convert.
     objects : dict[str, list[str]]
-        List of objects and parents already parsed.
+        Dictionary of objects already parsed.
 
     Returns
     -------
     : dict[str, list[str]]
-        Updated list of objects and children.
+        Updated dictionary of objects and upstream dependencies.
 
     Notes
     -----
-    Expects a two columns dataset, each line embedding a `child,parent` pair.
+    Expects a two columns dataset, each line embedding a `object1,object2` pair; the
+    second object is expected to be depended upon.
     """
     for r in content.split("\n"):
         if len(r.strip()):
             c, p = r.split(",")
 
-            # list dependencies as parent -> child(ren)
+            # list dependencies as parent -> (list of) child(ren)
             if p in objects:
                 objects[p].append(c)
             else:
