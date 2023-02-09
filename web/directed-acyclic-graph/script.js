@@ -218,7 +218,7 @@ document.getElementById("depviz").innerHTML += `
 document.getElementById("depviz-button").addEventListener("click", (event) => {
     if (document.getElementById("depviz-graph")) {
 
-        // remove the circle
+        // remove the diagram
         document.getElementById("depviz-graph").remove();
 
         // reset the form
@@ -235,7 +235,7 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
                 (document.getElementById("depviz-reverse").checked) ? true : false
             );
 
-            // draw the circle
+            // draw the diagram
             drawGraph(data);
 
             // remove the form

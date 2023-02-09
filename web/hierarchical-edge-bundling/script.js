@@ -21,8 +21,8 @@ const generateGraph = (
     const dataT = {},
           nodes = {};
 
-    // transpose the data to have a reversed index accessible quickly dependening on the
-    // volume of data this can become expensive...
+    // transpose the data to have a reversed index accessible quickly
+    // dependening on the volume of data this can become expensive...
     Object.keys(data).forEach(n1 => {
         data[n1].forEach(n2 => {
             if (Object.keys(dataT).includes(n2)) {
