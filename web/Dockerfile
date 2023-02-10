@@ -87,7 +87,7 @@ RUN rm `find . -name "*.md"` \
                     $f; \
     done \
  && find . -name "*.js" | while read f; do \
-      terser --compress --mangle --output $f $f; \
+      terser --compress --mangle --output $f $f || echo "terser cannot minify ${f:2}, leaving as is"; \
     done
 
 
