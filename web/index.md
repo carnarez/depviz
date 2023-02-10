@@ -42,6 +42,14 @@ Based on the [`3d-force-graph`](https://github.com/vasturiano/3d-force-graph) pa
 and the excellent series of examples around it. Itself making use of the now well-known
 [`three.js`](https://github.com/mrdoob/three.js) and its WebGL rendering.
 
+##### [`Graphviz`](/graphviz-graph)
+
+The drawing engine written in `C`, [`Graphviz`](https://graphviz.org/), has now been
+[compiled to WASM](https://hpcc-systems.github.io/hpcc-js-wasm/classes/graphviz.Graphviz.html)
+by the folks at [HPCC Systems](https://hpccsystems.com/), making it usable in browsers.
+
+Beware, expect old-school graphics.
+
 ##### [Hierarchical edge bundling](/hierarchical-edge-bundling)
 
 My personal favourite to visualise multilevel dependency networks. According to the
