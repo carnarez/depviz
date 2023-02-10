@@ -88,6 +88,86 @@ def clean_query(query: str) -> str:
     return q
 
 
+def _split(
+    query: str, parts: dict[str, list[str]] = {}
+) -> tuple[str, dict[str, list[str]]]:
+    r"""Extract and parse subqueries from a query (or subquery).
+
+    Parameters
+    ----------
+    query : str
+        The DDL to parse.
+    parts : dict[str, list[str]]
+        Dictionary of [sub]queries and associated DDL that were already parsed.
+
+    Returns
+    -------
+    : str
+        The query, cleaned from its parts.
+    : dict[str, list[str]]
+        Dictionary of [sub]queries and associated DDL, split in parts if the `UNION`
+        keyword is found.
+
+    Note
+    ----
+    A subquery is identified as a CTE, _i.e._, `... as ( select ... )`. The following
+    regular expression is used: `[^\s]+\s+AS\s+\(\s+SELECT`.
+    """
+    # regular expression to catch subquery
+    r = r"([^\s]+)(\s+as\s+)(\(\s+select)"
+
+    # extract subqueries until the length of the string does not change anymore
+    N = len(query) + 1
+    while N != len(query):
+        N = len(query)
+
+        # find a match
+        if (m := re.search(r, query)) is not None:
+            n = m.group(1)  # name of the subquery
+            a = m.group(2)  # ... as ...
+            i = m.end(2)  # start of the subquery
+            b = 0  # number of open/close brackets
+            s = ""  # stored characters
+
+            read = True  # store the characters until false
+            while read:
+
+                # fetch the next character
+                try:
+                    c = query[i]
+                except IndexError:
+                    c = None
+
+                # count opening/closing brackets
+                b += 1 if c == "(" else 0
+                b -= 1 if c == ")" else 0
+
+                # add the character to the stored string
+                s += c if c is not None else ""
+
+                # iterate
+                i += 1
+
+                # stop reading when the counts reach 0
+                read = False if not b or c is None else True
+
+            # remove the part(s) from the query and iterate
+            query = query.replace(f"{n}{a}{s}", f"%SUBQUERY:{n}%", 1)
+
+            # call itself over the subquery if it needs to be parsed further (subquery
+            # within subquery)
+            if re.search(r, s) is not None:
+                s, parts = _split(s.strip(), parts)
+
+            # clean up further to make it readable
+            s = re.sub(r"select\s+(.*?)\s+from", "select %COLUMNS% from", s)
+
+            # store the query and its parts
+            parts[n] = s
+
+    return query, parts
+
+
 def split_query(query: str) -> dict[str, list[str]]:
     r"""Split a query in its subqueries, if any.
 
@@ -111,9 +191,10 @@ def split_query(query: str) -> dict[str, list[str]]:
     2. Read each character from there, keeping count of opening/closing brackets; once
        this number reaches zero (or we seeked to end of the query) we are done with the
        subquery.
-    3. Store the subquery (split on the `UNION` keyword, if any) under the CTE name.
-    4. Move on to the next subquery.
-    5. Extract the main query, if any, using the following regular expressions (these
+    3. Store the subquery under the CTE name.
+    4. Recursively search for new CTE statements within the subquery, if any.
+    5. Move on to the next subquery.
+    6. Extract the main query, if any, using the following regular expressions (these
        could be factored a bit further but clarity prevails):
         * `CREATE\s+EXTERNAL\s+TABLE\s+([^\s]+)`
         * `CREATE\s+TABLE\s([^\s]+)`
@@ -121,57 +202,8 @@ def split_query(query: str) -> dict[str, list[str]]:
         * `CREATE\+OR\s+REPLACE\s+VIEW\s([^\s]+)`
         * `CREATE\s+VIEW\s([^\s]+)`
     """
-    parts: dict[str, list[str]] = {}
-
-    # extract subqueries
-    n = len(query) + 1
-    while n != len(query):
-        n = len(query)
-
-        # find a match
-        if (m := re.search(r"([^\s]+)(\s+as\s+)(\(\s+select)", query)) is not None:
-            n = m.group(1)  # name of the cte
-            i = m.end(2)  # start of the subquery
-            b = 0  # number of open brackets
-            s = ""  # stored characters
-
-            read = True  # store the characters until false
-            while read:
-
-                # count opening/closing brackets; if counts reaches 0 we are done
-                if query[i] == "(":
-                    b += 1
-                if query[i] == ")":
-                    b -= 1
-                    if b == 0:
-                        read = False
-
-                # end of the query
-                try:
-                    s += query[i]
-                except IndexError:
-                    read = False
-
-                # iterate
-                i += 1
-
-            # save the part(s)
-            if re.search(r"from\s+\(\s+select", s) is not None:
-                parts[n] = [s.strip().lstrip("(").rstrip(")").strip()]
-            else:
-                parts[n] = list(
-                    map(
-                        str.strip,
-                        re.split(r"union[ all]*", s.strip().lstrip("(").rstrip(")")),
-                    )
-                )
-
-            # remove the part(s) from the query and iterate
-            query = query.replace(f"{n}{m.group(2)}{s}", f"%SUBQUERY:{n}%", 1)
-
-    # remove column selection
-    for m in re.finditer(r"select\s+(.*?)\s+from\s+[^\s(]+", query):
-        query = query.replace(m.group(1), "%COLUMNS%")
+    # recursively extract subqueries
+    query, parts = _split(query)
 
     # extract main query, if any (if the query does not generate any object, this step
     # returns nothing)
@@ -183,11 +215,10 @@ def split_query(query: str) -> dict[str, list[str]]:
         r"create\s+view\s([^\s]+)",
     ):
         if (m := re.search(r, query, flags=re.IGNORECASE)) is not None:
-            parts[m.group(1)] = list(map(str.strip, re.split(r"union[ all]*", query)))
+            parts[m.group(1)] = re.sub(
+                r"select\s+(.*?)\s+from", "select %COLUMNS% from", query
+            )
             break
-
-    # debug
-    # print(query)
 
     return parts
 
@@ -217,17 +248,23 @@ def fetch_dependencies(parts: dict[str, list[str]]) -> dict[str, list[str]]:
 
     # iterate over each object -> associated subqueries
     for n, p in parts.items():
-        for q in p:
-            if any([f" {s} " in q.lower() for s in ("from", "join", "location")]):
-                for r in (r"from\s+([^\s(]+)", r"join\s+([^\s(]+)", r"location\s+'(s3://.+)'"):
-                    for m in re.finditer(r, q, flags=re.IGNORECASE):
-                        if n in tree:
-                            if m.group(1) not in tree[n]:
-                                tree[n].append(m.group(1))
-                        else:
-                            tree[n] = [m.group(1)]
-            else:
-                tree[n] = []
+        if any([f" {k} " in p.lower() for k in ("from", "join", "location")]):
+            for r in (
+                r"from\s+([^\s(]+)",
+                r"join\s+([^\s(]+)",
+                r"location\s+'(s3://.+)'",
+            ):
+                for m in re.finditer(r, p, flags=re.IGNORECASE):
+                    if n in tree:
+                        if m.group(1) not in tree[n]:
+                            tree[n].append(m.group(1))
+                    else:
+                        tree[n] = [m.group(1)]
+        else:
+            tree[n] = []
+
+        # order the dependencies
+        tree[n].sort()
 
     return tree
 
