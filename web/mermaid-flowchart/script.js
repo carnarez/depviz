@@ -34,11 +34,15 @@ const generateMermaidDiagram = (
     const nodes = {};
     let i = 0;
     Object.keys(data).forEach(n1 => {
-        i += 1;
-        if (!Object.keys(nodes).includes(n1)) nodes[n1] = i;
-        data[n1].forEach(n2 => {
+        if (!Object.keys(nodes).includes(n1)) {
             i += 1;
-            if (!Object.keys(nodes).includes(n2)) nodes[n2] = i;
+            nodes[n1] = i;
+        }
+        data[n1].forEach(n2 => {
+            if (!Object.keys(nodes).includes(n2)) {
+                i += 1;
+                nodes[n2] = i;
+            }
         });
     });
 
@@ -47,7 +51,7 @@ const generateMermaidDiagram = (
 
     // nodes
     diagram += "  %% nodes\n";
-    Object.keys(nodes).forEach((n) => diagram += `  node${nodes[n]}(${n})\n`);
+    Object.keys(nodes).forEach(n => diagram += `  node${nodes[n]}(${n})\n`);
 
     // links
     diagram += "  %% links\n";
@@ -70,7 +74,7 @@ const generateMermaidDiagram = (
 
     // add the diagram to the element
     mermaid.mermaidAPI.render(
-        "mermaid-diagram", diagram, (svg) => { element.innerHTML = svg; }//, element
+        "mermaid-diagram", diagram, (svg) => { element.innerHTML = svg; }
     );
 
     return element;

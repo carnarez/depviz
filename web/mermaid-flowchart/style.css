@@ -14,7 +14,7 @@ article > * {
 }
 
 #mermaid-diagram {
-    margin: 2rem auto 0 auto;
+    margin: 2rem auto;
 }
 
 #depviz-form input[type=radio]#depviz-lr + label {
