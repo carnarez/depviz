@@ -57,10 +57,10 @@ Well said.
 
 Graph built via [`Mermaid`](https://github.com/mermaid-js/mermaid)
 ([docs](https://mermaid.js.org/)), a somewhat broader implementation of the DAG solution
-presented above defining its own syntax (generated in these pages from the provided
-data) and based on yet another rendering engine:
-[`dagre-d3`](https://github.com/dagrejs/dagre-d3) (now officially deprecated but still
-working well).
+presented above defining its own [syntax](https://mermaid.js.org/syntax/flowchart.html)
+(generated in these pages from the provided data) and based on yet another rendering
+engine: [`dagre-d3`](https://github.com/dagrejs/dagre-d3) (now officially deprecated but
+still working well).
 
 #### Input formats
 
