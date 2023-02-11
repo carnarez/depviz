@@ -64,7 +64,8 @@ def clean_query(query: str) -> str:
         * `"([(,)])"` -> `" , "`: single spaces around function parameters;
         * `"([A-Za-z0-9_]+)\s*\.\s*([A-Za-z0-9_]+)"` -> `"[...].[...]"`: remove spaces
           around object descriptors;
-        * `"(.*)\s*=\s*(.*)"` -> `"[...] = [...]"`: single spaces around equal signs;
+        * `"(.*)\s*[<=>]+\s*(.*)"` -> `"[...] = [...]"`: single spaces around equal,
+          greater or less than signs (or combinations thereof);
         * `"(.*)\s*\|\|\s*(.*)` -> `"[...] || [...]"`: single spaces around
           concatenation operators;
         * `"(.*)\s*::\s*(.*)"` -> `"[...]::[...]"`: remove spaces around datatyping
@@ -79,7 +80,7 @@ def clean_query(query: str) -> str:
     q = re.sub(r"--.*", "", q)
     q = re.sub("([(,)])", r" \1 ", q)
     q = re.sub(r"([A-Za-z0-9_]+)\s*\.\s*([A-Za-z0-9_]+)", r"\1.\2", q)
-    q = re.sub(r"(.*)\s*=\s*(.*)", r"\1 = \2", q)
+    q = re.sub(r"(.*)\s*[<=>]+\s*(.*)", r"\1 = \2", q)
     q = re.sub(r"(.*)\s*\|\|\s*(.*)", r"\1 || \2", q)
     q = re.sub(r"(.*)\s*::\s*(.*)", r"\1::\2", q)
     q = re.sub(r"[\s]+", " ", q)

@@ -3,6 +3,26 @@
 from sql_to_json import clean_query, fetch_dependencies, split_query
 
 
+def _process(query: str) -> dict[str, list[str]]:
+    """Wrapper function to process a query.
+
+    Parameters
+    ----------
+    query : str
+        Query to process.
+
+    Returns
+    -------
+    : dict[str, list[str]]
+        Output of a processed query, to be asserted in the tests.
+    """
+    q = clean_query(query)
+    s = split_query(q)
+    d = fetch_dependencies(s)
+
+    return q, s, d
+
+
 def test_convoluted_query():
     """Test a convoluted query, including subqueries and subsubqueries.
 
@@ -67,8 +87,8 @@ def test_convoluted_query():
     cross join subquery3
     ```
     """
-    # query
-    q = """
+    q, s, d = _process(
+        """
     with
       subquery1 as (
         select
@@ -121,13 +141,8 @@ def test_convoluted_query():
     on s1.attr = s2.attr
     cross join subquery3
     """
+    )
 
-    # process
-    q = clean_query(q)
-    s = split_query(q)
-    d = fetch_dependencies(s)
-
-    # test
     assert d == {
         "subsubquery1": ["table1", "table2"],
         "subsubquery2": ["table3"],
@@ -152,8 +167,8 @@ def test_create_external_table():
     LOCATION 's3://bucket/key/_symlink_format_manifest';
     ```
     """
-    # query
-    q = """
+    q, s, d = _process(
+        """
     CREATE EXTERNAL TABLE external_table (
       attr1 timestamp,
       attr2 varchar(32),
@@ -164,13 +179,8 @@ def test_create_external_table():
     OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
     LOCATION 's3://bucket/key/_symlink_format_manifest';
     """
+    )
 
-    # process
-    q = clean_query(q)
-    s = split_query(q)
-    d = fetch_dependencies(s)
-
-    # test
     assert d == {"external_table": ["s3://bucket/key/_symlink_format_manifest"]}
 
 
@@ -183,19 +193,14 @@ def test_create_materialized_view():
     select * from external_table
     ```
     """
-    # query
-    q = """
+    q, s, d = _process(
+        """
     create materialized view materialized_view
     backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
     select * from external_table
     """
+    )
 
-    # process
-    q = clean_query(q)
-    s = split_query(q)
-    d = fetch_dependencies(s)
-
-    # test
     assert d == {"materialized_view": ["external_table"]}
 
 
@@ -206,15 +211,8 @@ def test_create_table():
     create table table2 as select * from table1
     ```
     """
-    # query
-    q = "create table table2 as select * from table1"
+    q, s, d = _process("create table table2 as select * from table1")
 
-    # process
-    q = clean_query(q)
-    s = split_query(q)
-    d = fetch_dependencies(s)
-
-    # tests
     assert s == {"table2": "create table table2 as select %COLUMNS% from table1"}
     assert d == {"table2": ["table1"]}
 
@@ -230,16 +228,60 @@ def test_create_view():
     create view simple_view as select * from static_table
     ```
     """
-    # queries
     for q in (
         "create or replace view simple_view as select * from static_table",
         "create view simple_view as select * from static_table",
     ):
+        q, s, d = _process(q)
 
-        # process
-        q = clean_query(q)
-        s = split_query(q)
-        d = fetch_dependencies(s)
-
-        # test
         assert d == {"simple_view": ["static_table"]}
+
+
+def test_subqueries():
+    """Test for subqueries (CTE), _e.g._, statement including a `WITH` clause.
+
+    ```sql
+    with
+      subquery1 as (
+        select
+          t1.attr1,
+          t2.attr2
+        from table1 t1
+        inner join table2 t2
+        on t1.attr = t2.attr
+      ),
+      subquery2 as (
+        select
+          attr1,
+          attr2
+        from table3
+      )
+    select * from subquery1 s1
+    left join (select * from subquery2) s2
+    on s1.attr1 = s2.attr1
+    ```
+    """
+    q, s, d = _process(
+        """
+    with
+      subquery1 as (
+        select
+          t1.attr1,
+          t2.attr2
+        from table1 t1
+        inner join table2 t2
+        on t1.attr = t2.attr
+      ),
+      subquery2 as (
+        select
+          attr1,
+          attr2
+        from table3
+      )
+    select * from subquery1 s1
+    left join (select * from subquery2) s2
+    on s1.attr1 = s2.attr1
+    """
+    )
+
+    assert d == {"subquery1": ["table1", "table2"], "subquery2": ["table3"]}

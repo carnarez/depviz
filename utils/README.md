@@ -242,7 +242,8 @@ and regular expressions.
    - `"([(,)])"` -> `" , "`: single spaces around function parameters;
    - `"([A-Za-z0-9_]+)\s*\.\s*([A-Za-z0-9_]+)"` -> `"[...].[...]"`: remove spaces around
      object descriptors;
-   - `"(.*)\s*=\s*(.*)"` -> `"[...] = [...]"`: single spaces around equal signs;
+   - `"(.*)\s*[<=>]+\s*(.*)"` -> `"[...] = [...]"`: single spaces around equal, greater
+     or less than signs (or combinations thereof);
    - `"(.*)\s*\|\|\s*(.*)` -> `"[...] || [...]"`: single spaces around concatenation
      operators;
    - `"(.*)\s*::\s*(.*)"` -> `"[...]::[...]"`: remove spaces around datatyping
@@ -326,6 +327,8 @@ Some test regarding our little SQL parsing.
   statement.
 - [`test_create_view()`](#test_sql_to_jsontest_create_view): Test for
   `CREATE [OR REPLACE] VIEW` statements.
+- [`test_subqueries()`](#test_sql_to_jsontest_subqueries): Test for subqueries (CTE),
+  _e.g._, statement including a `WITH` clause.
 
 ## Functions
 
@@ -415,7 +418,7 @@ create external table external_table (
 ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
 STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
 OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-LOCATION 's3://bucket/data/_symlink_format_manifest';
+LOCATION 's3://bucket/key/_symlink_format_manifest';
 ```
 
 ### `test_sql_to_json.test_create_materialized_view`
@@ -458,4 +461,33 @@ create or replace view simple_view as select * from static_table
 
 ```sql
 create view simple_view as select * from static_table
+```
+
+### `test_sql_to_json.test_subqueries`
+
+```python
+test_subqueries():
+```
+
+Test for subqueries (CTE), _e.g._, statement including a `WITH` clause.
+
+```sql
+with
+  subquery1 as (
+    select
+      t1.attr1,
+      t2.attr2
+    from table1 t1
+    inner join table2 t2
+    on t1.attr = t2.attr
+  ),
+  subquery2 as (
+    select
+      attr1,
+      attr2
+    from table3
+  )
+select * from subquery1 s1
+left join (select * from subquery2) s2
+on s1.attr1 = s2.attr1
 ```
