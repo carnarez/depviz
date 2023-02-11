@@ -29,7 +29,7 @@ import json
 import sys
 
 
-def convert_csv(content: str, objects: dict[str, list[str]]) -> tuple[str, list[str]]:
+def to_json(content: str, objects: dict[str, list[str]]) -> tuple[str, list[str]]:
     r"""Convert the CSV content to JSON.
 
     Parameters
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     # parse each file
     for a in sys.argv[1:]:
         with open(a) as f:
-            o = convert_csv(f.read(), o)
+            o = to_json(f.read(), o)
 
     # output
     print(json.dumps(o))
