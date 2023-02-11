@@ -6,13 +6,15 @@ const computedStyle = window.getComputedStyle(document.documentElement);
 
 // see https://mermaid.live/ for examples
 // https://mermaid.js.org/config/usage.html#api-usage
+// https://hpcc-systems.github.io/hpcc-js-wasm/classes/graphviz.Graphviz.html
 const generateGraphvizDiagram = (
     data,
     {
         fontColor = "#000", // font color
         nodeColor = "#fff", // node background color
         nodeBorderColor = "#000", // node border color
-        linkColor = "#000" // link color
+        linkColor = "#000", // link color
+        layoutEngine = "dot" // layout engine to use
     } = {}
 ) => {
 
@@ -68,13 +70,13 @@ const generateGraphvizDiagram = (
     element.id = "depviz-graph";
 
     // add the diagram to the element
-    element.innerHTML = graphviz.layout(diagram);
+    element.innerHTML = graphviz.layout(diagram, "svg", layoutEngine);
 
     return element;
 }
 
 // process the posted data and draw the svg
-const drawGraph = (data) => {
+const drawGraph = (data, layout) => {
 
     // add the graph to the page
     document.getElementById("depviz").appendChild(
@@ -84,7 +86,8 @@ const drawGraph = (data) => {
                 fontColor: computedStyle.getPropertyValue("--font-color"),
                 nodeColor: computedStyle.getPropertyValue("--background-color-alt"),
                 nodeBorderColor: computedStyle.getPropertyValue("--font-color"),
-                linkColor: computedStyle.getPropertyValue("--font-color")
+                linkColor: computedStyle.getPropertyValue("--font-color"),
+                layoutEngine: layout
             }
         )
     );
@@ -159,7 +162,7 @@ const toJSON = (rawData, inputFormat, reverseTree) => {
 }
 
 // define the form elements
-const form = `
+let form = `
 <textarea
   id="depviz-raw"
   placeholder="select input format and whether a list of parents per child or a list of children per parent is provided"
@@ -173,6 +176,21 @@ const form = `
 <label for="depviz-reverse">parent &rarr; children</label>
 <input id="depviz-vanilla" name="flow" type="radio">
 <label for="depviz-vanilla">child &rarr; parents</label>
+`;
+
+// default layout engine is "dot"
+form += `<div class="depviz-dropdown">
+  <span id="depviz-engine">dot</span>
+  <div class="depviz-dropdown-content">
+`;
+
+["circo", "dot", "fdp", "neato", "osage", "patchwork", "sfdp", "twopi"].forEach(l => {
+    form += `<span onclick="document.getElementById('depviz-engine').innerHTML = '${l}';">${l}</span>`;
+});
+
+form += `
+  </div>
+</div>
 `;
 
 // add the initial form to the page
@@ -195,7 +213,7 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
         document.getElementById("depviz-button").innerHTML = "Submit";
 
     } else {
-        try {
+//        try {
 
             // convert to input expected by the rendering function
             const data = toJSON(
@@ -205,17 +223,17 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
             );
 
             // draw the diagram
-            drawGraph(data);
+            drawGraph(data, document.getElementById("depviz-engine").innerHTML);
 
             // remove the form
             document.getElementById("depviz-form").innerHTML = "";
             document.getElementById("depviz-button").innerHTML = "Reset";
 
-        } catch(e) {
-
-            // highlight the textarea
-            document.getElementById("depviz-raw").classList.add("error");
-
-        }
+//        } catch(e) {
+//
+//            // highlight the textarea
+//            document.getElementById("depviz-raw").classList.add("error");
+//
+//        }
     }
 });
