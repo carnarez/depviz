@@ -203,16 +203,17 @@ def split_query(query: str) -> dict[str, list[str]]:
         * `CREATE\s+VIEW\s([^\s]+)`
     """
     # recursively extract subqueries
-    query, parts = _split(query)
+    # make sure we start from empty parts
+    query, parts = _split(query, {})
 
     # extract main query, if any (if the query does not generate any object, this step
     # returns nothing)
     for r in (
         r"create\s+external\s+table\s+([^\s]+)",
         r"create\s+table\s([^\s]+)",
-        r"create\s+materialized\s+view\s([^\s]+)",
-        r"create\+or\s+replace\s+view\s([^\s]+)",
-        r"create\s+view\s([^\s]+)",
+        r"create\s+materialized\s+view\s+([^\s]+)",
+        r"create\s+or\s+replace\s+view\s+([^\s]+)",
+        r"create\s+view\s+([^\s]+)",
     ):
         if (m := re.search(r, query, flags=re.IGNORECASE)) is not None:
             parts[m.group(1)] = re.sub(
@@ -277,7 +278,7 @@ if __name__ == "__main__":
         sys.argv.remove("--pretty")
         indent = 4
     else:
-        indent = None
+        indent = None  # type: ignore
 
     # parse each statement in each script provided
     for a in sys.argv[1:]:
