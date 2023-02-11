@@ -41,7 +41,7 @@ def to_dot(objects: dict[str, list[str]]) -> str:
     : str
         `DOT` diagram.
     """
-    d = "";
+    d = ""
 
     # build the list of unique nodes
     nodes: dict[str, int] = {}
@@ -56,12 +56,12 @@ def to_dot(objects: dict[str, list[str]]) -> str:
                 nodes[n2] = i
 
     # nodes
-    d += "  // nodes\n";
+    d += "  // nodes\n"
     for i, n in enumerate(nodes):
         d += f'  node{i} [label"{n}"]\n'
 
     # links
-    d += "  // links\n";
+    d += "  // links\n"
     for n1 in objects:
         for n2 in objects:
             d += f"  node{nodes[n1]} -- node{nodes[n2]}\n"
@@ -85,7 +85,7 @@ def to_mmd(objects: dict[str, list[str]]) -> str:
         `Mermaid` diagram.
     """
     # always top-bottom, manually change it if you want
-    d = "graph TB\n";
+    d = "graph TB\n"
 
     # build the list of unique nodes
     nodes: dict[str, int] = {}
@@ -100,12 +100,12 @@ def to_mmd(objects: dict[str, list[str]]) -> str:
                 nodes[n2] = i
 
     # nodes
-    d += "  %% nodes\n";
+    d += "  %% nodes\n"
     for i, n in enumerate(nodes):
         d += f"  node{i}({n})\n"
 
     # links
-    d += "  %% links\n";
+    d += "  %% links\n"
     for n1 in objects:
         for n2 in objects:
             d += f"  node{nodes[n1]} --- node{nodes[n2]}\n"
