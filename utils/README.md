@@ -401,6 +401,8 @@ on s1.attr = s2.attr
 cross join subquery3
 ```
 
+Below the query diagram:
+
 ```mermaid
 graph LR
   %% nodes
@@ -428,7 +430,11 @@ graph LR
   node7 --- node8
   node11 --- node8
   %% style
+  linkStyle default stroke-width:1px;
 ```
+
+Note the final `SELECT` statement is indicated as a node in itself, despite not being an
+object.
 
 ### `test_sql_to_json.test_create_external_table`
 
