@@ -401,6 +401,35 @@ on s1.attr = s2.attr
 cross join subquery3
 ```
 
+```mermaid
+graph LR
+  %% nodes
+  node1(table1)
+  node2(subsubquery1)
+  node3(table2)
+  node4(table3)
+  node5(subsubquery2)
+  node6(subquery1)
+  node7(subquery2)
+  node8(SELECT)
+  node9(table4)
+  node10(table5)
+  node11(subquery3)
+  %% links
+  node1 --- node2
+  node3 --- node2
+  node4 --- node5
+  node2 --- node6
+  node5 --- node6
+  node6 --- node7
+  node6 --- node8
+  node9 --- node7
+  node10 --- node7
+  node7 --- node8
+  node11 --- node8
+  %% style
+```
+
 ### `test_sql_to_json.test_create_external_table`
 
 ```python

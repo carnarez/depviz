@@ -206,6 +206,7 @@ def split_query(query: str) -> dict[str, list[str]]:
     # recursively extract subqueries
     # make sure we start from empty parts
     query, parts = _split(query, {})
+    N = len(parts)
 
     # extract main query, if any (if the query does not generate any object, this step
     # returns nothing)
@@ -221,6 +222,12 @@ def split_query(query: str) -> dict[str, list[str]]:
                 r"select\s+(.*?)\s+from", "select %COLUMNS% from", query
             )
             break
+
+    # if not object was found, we still want to analyze the last statement
+    if len(parts) == N:
+        parts["SELECT"] = re.sub(
+            r"select\s+(.*?)\s+from", "select %COLUMNS% from", query
+        )
 
     return parts
 

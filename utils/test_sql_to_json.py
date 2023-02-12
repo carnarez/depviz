@@ -86,9 +86,37 @@ def test_convoluted_query():
     on s1.attr = s2.attr
     cross join subquery3
     ```
+
+    ```mermaid
+    graph LR
+      %% nodes
+      node1(table1)
+      node2(subsubquery1)
+      node3(table2)
+      node4(table3)
+      node5(subsubquery2)
+      node6(subquery1)
+      node7(subquery2)
+      node8(SELECT)
+      node9(table4)
+      node10(table5)
+      node11(subquery3)
+      %% links
+      node1 --- node2
+      node3 --- node2
+      node4 --- node5
+      node2 --- node6
+      node5 --- node6
+      node6 --- node7
+      node6 --- node8
+      node9 --- node7
+      node10 --- node7
+      node7 --- node8
+      node11 --- node8
+      %% style
+    ```
     """
-    q, s, d = _process(
-        """
+    q = """
     with
       subquery1 as (
         select
@@ -141,7 +169,8 @@ def test_convoluted_query():
     on s1.attr = s2.attr
     cross join subquery3
     """
-    )
+
+    q, s, d = _process(q)
 
     assert d == {
         "subsubquery1": ["table1", "table2"],
@@ -149,6 +178,7 @@ def test_convoluted_query():
         "subquery1": ["subsubquery1", "subsubquery2"],
         "subquery2": ["subquery1", "table4", "table5"],
         "subquery3": [],
+        "SELECT": ["subquery1", "subquery2", "subquery3"],
     }
 
 
@@ -167,8 +197,7 @@ def test_create_external_table():
     LOCATION 's3://bucket/key/_symlink_format_manifest';
     ```
     """
-    q, s, d = _process(
-        """
+    q = """
     CREATE EXTERNAL TABLE external_table (
       attr1 timestamp,
       attr2 varchar(32),
@@ -179,7 +208,8 @@ def test_create_external_table():
     OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
     LOCATION 's3://bucket/key/_symlink_format_manifest';
     """
-    )
+
+    q, s, d = _process(q)
 
     assert d == {"external_table": ["s3://bucket/key/_symlink_format_manifest"]}
 
@@ -193,13 +223,13 @@ def test_create_materialized_view():
     select * from external_table
     ```
     """
-    q, s, d = _process(
-        """
+    q = """
     create materialized view materialized_view
     backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
     select * from external_table
     """
-    )
+
+    q, s, d = _process(q)
 
     assert d == {"materialized_view": ["external_table"]}
 
@@ -261,8 +291,7 @@ def test_subqueries():
     on s1.attr1 = s2.attr1
     ```
     """
-    q, s, d = _process(
-        """
+    q = """
     with
       subquery1 as (
         select
@@ -282,6 +311,11 @@ def test_subqueries():
     left join (select * from subquery2) s2
     on s1.attr1 = s2.attr1
     """
-    )
 
-    assert d == {"subquery1": ["table1", "table2"], "subquery2": ["table3"]}
+    q, s, d = _process(q)
+
+    assert d == {
+        "subquery1": ["table1", "table2"],
+        "subquery2": ["table3"],
+        "SELECT": ["subquery1", "subquery2"],
+    }
