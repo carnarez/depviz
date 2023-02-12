@@ -430,7 +430,7 @@ graph LR
   node7 --- node8
   node11 --- node8
   %% style
-  linkStyle default stroke-width:1px;
+  linkStyle default fill:none,stroke-width:1px
 ```
 
 Note the final `SELECT` statement is indicated as a node in itself, despite not being an

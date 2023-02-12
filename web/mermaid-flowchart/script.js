@@ -23,10 +23,10 @@ const generateMermaidDiagram = (
         themeVariables: {
             fontFamily: computedStyle.getPropertyValue("--font-family"),
             fontSize: computedStyle.getPropertyValue("--font-size"),
+            lineColor: linkColor,
             primaryColor: nodeColor,
             primaryBorderColor: nodeBorderColor,
-            primaryTextColor: fontColor,
-            lineColor: linkColor
+            primaryTextColor: fontColor
         }
     });
 
@@ -63,7 +63,7 @@ const generateMermaidDiagram = (
 
     // style (another way to show styling mermaid is cumbersome)
     diagram += "  %% style\n";
-    diagram += `  linkStyle default stroke-width:1px;\n`;
+    diagram += `  linkStyle default fill:none,stroke-width:1px\n`;
 
     // debug
     console.log(diagram);
