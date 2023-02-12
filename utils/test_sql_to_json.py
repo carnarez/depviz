@@ -79,12 +79,10 @@ def test_convoluted_query():
           '2' as attr2
       )
     select
-      s1.attr1,
+      s2.attr1,
       s2.attr2
-    from subquery1 s1
-    join subquery2 s2
-    on s1.attr = s2.attr
-    cross join subquery3
+    from subquery2 s2
+    cross join subquery3 s3
     ```
 
     Below the query diagram:
@@ -99,9 +97,9 @@ def test_convoluted_query():
       node5(subsubquery2)
       node6(subquery1)
       node7(subquery2)
-      node8(SELECT)
-      node9(table4)
-      node10(table5)
+      node8(table4)
+      node9(table5)
+      node10(SELECT)
       node11(subquery3)
       %% links
       node1 --- node2
@@ -110,11 +108,10 @@ def test_convoluted_query():
       node2 --- node6
       node5 --- node6
       node6 --- node7
-      node6 --- node8
+      node8 --- node7
       node9 --- node7
-      node10 --- node7
-      node7 --- node8
-      node11 --- node8
+      node7 --- node10
+      node11 --- node10
       %% style
       linkStyle default fill:none,stroke-width:1px
     ```
@@ -168,12 +165,10 @@ def test_convoluted_query():
           '2' as attr2
       )
     select
-      s1.attr1,
+      s2.attr1,
       s2.attr2
-    from subquery1 s1
-    join subquery2 s2
-    on s1.attr = s2.attr
-    cross join subquery3
+    from subquery2 s2
+    cross join subquery3 s3
     """
 
     q, s, d = _process(q)
@@ -184,7 +179,7 @@ def test_convoluted_query():
         "subquery1": ["subsubquery1", "subsubquery2"],
         "subquery2": ["subquery1", "table4", "table5"],
         "subquery3": [],
-        "SELECT": ["subquery1", "subquery2", "subquery3"],
+        "SELECT": ["subquery2", "subquery3"],
     }
 
 
