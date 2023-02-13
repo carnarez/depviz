@@ -210,6 +210,7 @@ $ python script.py fact_*.sql dim_*.sql
 **Functions**
 
 - [`clean_query()`](#sql_to_jsonclean_query): Deep-cleaning of a SQL query via
+- [`clean_functions()`](#sql_to_jsonclean_functions): Replace
 - [`split_query()`](#sql_to_jsonsplit_query): Split a query in its subqueries, if any.
 - [`fetch_dependencies()`](#sql_to_jsonfetch_dependencies): Fetch upstream dependencies
   from each subquery.
@@ -249,6 +250,35 @@ and regular expressions.
    - `"(.*)\s*::\s*(.*)"` -> `"[...]::[...]"`: remove spaces around datatyping
      operators;
    - `"[\s]+"` -> `" "`: replace multiple spaces by single spaces.
+
+### `sql_to_json.clean_functions`
+
+```python
+clean_functions(query: str) -> str:
+```
+
+Replace
+
+**Parameters**
+
+- `query` \[`str`\]: The SQL query.
+
+**Returns**
+
+- \[`str`\]: Cleaned up query.
+
+**Notes**
+
+Currently testing for the following regular expression:
+
+- `"(\(\s+['\"].+?['\"]\s+)FROM(\s+\S+?\s+\))"`: match function parameters including
+  quoted keywords and the `FROM` keyword,
+- `"(\(\s+\S+?\s+)FROM(\s+\S+?\s+\))"`: match function parameters including regular
+  unquoted keywords and the `FROM` keyword,
+- `"(\(\s+\S+?\s+)FROM(\s+\S+?\s+\()"`: \`\`.
+
+The `FROM` from the matched pattern will be replaced by `%FROM%` not to be matched by
+the follow up processing.
 
 ### `sql_to_json.split_query`
 
@@ -327,6 +357,8 @@ Some test regarding our little SQL parsing.
   statement.
 - [`test_create_view()`](#test_sql_to_jsontest_create_view): Test for
   `CREATE [OR REPLACE] VIEW` statements.
+- [`test_false_positive_from()`](#test_sql_to_jsontest_false_positive_from): Test to
+  except `FUNC(... FROM ...)` statements
 - [`test_subqueries()`](#test_sql_to_jsontest_subqueries): Test for subqueries (CTE),
   _e.g._, statement including a `WITH` clause.
 
@@ -493,6 +525,21 @@ create or replace view simple_view as select * from static_table
 
 ```sql
 create view simple_view as select * from static_table
+```
+
+### `test_sql_to_json.test_false_positive_from`
+
+```python
+test_false_positive_from():
+```
+
+Test to except `FUNC(... FROM ...)` statements
+
+```sql
+select
+  extract(year from datetime),
+  extract(month from to_timestamp(trim('"' from string), 'YYYY-MM-DD HH:MI:SS.FF'))
+from table
 ```
 
 ### `test_sql_to_json.test_subqueries`

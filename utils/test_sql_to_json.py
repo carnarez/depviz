@@ -1,6 +1,6 @@
 """Some test regarding our little SQL parsing."""
 
-from sql_to_json import clean_query, fetch_dependencies, split_query
+from sql_to_json import clean_functions, clean_query, fetch_dependencies, split_query
 
 
 def _process(query: str) -> dict[str, list[str]]:
@@ -17,6 +17,7 @@ def _process(query: str) -> dict[str, list[str]]:
         Output of a processed query, to be asserted in the tests.
     """
     q = clean_query(query)
+    q = clean_functions(q)
     s = split_query(q)
     d = fetch_dependencies(s)
 
@@ -266,6 +267,29 @@ def test_create_view():
         q, s, d = _process(q)
 
         assert d == {"simple_view": ["static_table"]}
+
+
+def test_false_positive_from():
+    """Test to except `FUNC(... FROM ...)` statements
+
+    ```sql
+    select
+      extract(year from datetime),
+      extract(month from to_timestamp(trim('"' from string), 'YYYY-MM-DD HH:MI:SS.FF'))
+    from table
+    ```
+    """
+    q = """
+    select
+      extract(year from datetime),
+      extract(month from to_timestamp(trim('"' from string), 'YYYY-MM-DD HH:MI:SS.FF'))
+    from table
+    """
+
+    q, s, d = _process(q)
+
+    assert s == {"SELECT": "select %COLUMNS% from table"}
+    assert d == {"SELECT": ["table"]}
 
 
 def test_subqueries():

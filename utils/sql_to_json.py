@@ -89,6 +89,50 @@ def clean_query(query: str) -> str:
     return q
 
 
+def clean_functions(query: str) -> str:
+    r"""Replace
+
+    Parameters
+    ----------
+    query : str
+        The SQL query.
+
+    Returns
+    -------
+    : str
+        Cleaned up query.
+
+    Notes
+    -----
+    Currently testing for the following regular expression:
+
+    * `"(\(\s+['\"].+?['\"]\s+)FROM(\s+\S+?\s+\))"`: match function parameters including
+      quoted keywords and the `FROM` keyword,
+    * `"(\(\s+\S+?\s+)FROM(\s+\S+?\s+\))"`: match function parameters including regular
+      unquoted keywords and the `FROM` keyword,
+    * `"(\(\s+\S+?\s+)FROM(\s+\S+?\s+\()"`: ``.
+
+    The `FROM` from the matched pattern will be replaced by `%FROM%` not to be matched
+    by the follow up processing.
+    """
+    # clean up the query until its length does not change anymore
+    N = len(query) + 1
+    while N != len(query):
+        N = len(query)
+
+        # test for various cases; kind of expect a query that went through the
+        # clean_query() function first as it does not account for multiline text
+        for r in (
+            r"(\(\s+['\"].+?['\"]\s+)from(\s+\S+?\s+\))",
+            r"(\(\s+\S+?\s+)from(\s+\S+?\s+\))",
+            r"(\(\s+\S+?\s+)from(\s+\S+?\s+\()",  # reversed bracket
+        ):
+            for m in re.finditer(r, query):
+                query = query.replace(m.group(0), f"{m.group(1)}%FROM%{m.group(2)}")
+
+    return query
+
+
 def _split(
     query: str, parts: dict[str, list[str]] = {}
 ) -> tuple[str, dict[str, list[str]]]:
@@ -293,6 +337,7 @@ if __name__ == "__main__":
         with open(a) as f:
             for q in sqlparse.split(f.read()):
                 q = clean_query(q)
+                q = clean_functions(q)
                 p = split_query(q)
                 t = fetch_dependencies(p)
 
