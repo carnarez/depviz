@@ -377,6 +377,7 @@ The following query contains:
 - subqueries defined through `WITH`,
 - subqueries within subqueries (...),
 - subqueries without `FROM` or `JOIN`,
+- a function including the `FROM` keyword,
 - `FROM`, `JOIN`, `UNION`.
 
 ```sql
@@ -421,7 +422,7 @@ with
   ),
   subquery3 as (
     select
-      '1' as attr1,
+      trim('"' from attr1) as attr1,
       '2' as attr2
   )
 select
