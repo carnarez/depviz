@@ -1,12 +1,12 @@
 FLAGS=--interactive \
-	            --rm \
-	            --tty \
-	            --user "$$(id -u)":"$$(id -g)" \
-	            --volume /etc/group:/etc/group:ro \
-	            --volume /etc/passwd:/etc/passwd:ro \
-	            --volume /etc/shadow:/etc/shadow:ro \
-	            --volume "$(PWD)/utils":/usr/src \
-	            --workdir /usr/src \
+	  --rm \
+	  --tty \
+	  --user "$$(id -u)":"$$(id -g)" \
+	  --volume /etc/group:/etc/group:ro \
+	  --volume /etc/passwd:/etc/passwd:ro \
+	  --volume /etc/shadow:/etc/shadow:ro \
+	  --volume "$(PWD)/utils":/usr/src \
+	  --workdir /usr/src \
 
 build-utils:
 	@docker build --tag depviz/utils utils
@@ -28,9 +28,9 @@ test: build-utils
 	            --env COLUMNS=$(COLUMNS) \
 	            --name depviz-tests \
 	            depviz/utils python -m pytest --capture=no \
-	                                           --color=yes \
-	                                           --cov=sql_to_json \
-	                                           --cov-report term-missing \
-	                                           --override-ini="cache_dir=/tmp/pytest" \
-	                                           --verbose \
-	                                           --verbose
+	                                          --color=yes \
+	                                          --cov=sql_to_json \
+	                                          --cov-report term-missing \
+	                                          --override-ini="cache_dir=/tmp/pytest" \
+	                                          --verbose \
+	                                          --verbose
