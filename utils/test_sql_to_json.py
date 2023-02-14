@@ -73,7 +73,7 @@ def test_convoluted_query():
         on t4.attr1 = s1.attr1 and t4.attr2 > 0
         inner join table5 t5
         on t4.attr1 = t5.attr1
-        where t5.attr is not null
+        where t5.valid_from is not null
       ),
       subquery3 as (
         select
@@ -84,7 +84,7 @@ def test_convoluted_query():
       s2.attr1,
       s2.attr2
     from subquery2 s2
-    cross join subquery3 s3
+    cross join subquery3 s3;
     ```
 
     Below the query diagram:
@@ -159,7 +159,7 @@ def test_convoluted_query():
         on t4.attr1 = s1.attr1
         inner join table5 t5
         on t4.attr1 = t5.attr1
-        where t5.attr is not null
+        where t5.valid_from is not null
       ),
       subquery3 as (
         select
@@ -170,7 +170,7 @@ def test_convoluted_query():
       s2.attr1,
       s2.attr2
     from subquery2 s2
-    cross join subquery3 s3
+    cross join subquery3 s3;
     """
 
     q, s, d = _process(q)
@@ -280,7 +280,7 @@ def test_create_view():
 
 
 def test_false_positive_from():
-    """Test the exclusion of `..._from` attributes or `FUNCTION(... FROM ...)` clauses.
+    """Test the exclusion of `..._from` names or `FUNCTION(... FROM ...)` statements.
 
     ```sql
     select * from table t
