@@ -90,7 +90,7 @@ def clean_query(query: str) -> str:
 
 
 def clean_functions(query: str) -> str:
-    r"""Replace
+    r"""Escape `FROM` operators in SQL functions.
 
     Parameters
     ----------
@@ -272,6 +272,12 @@ def split_query(query: str) -> dict[str, list[str]]:
         parts["SELECT"] = re.sub(
             r"select\s+(.*?)\s+from", "select %COLUMNS% from", query
         )
+
+    # clean out unwanted objects (containing our "%SUBQUERY:" keyword for instance,
+    # product of using extra brackets and the imperfect regular expressions above)
+    for k in list(parts.keys()):
+        if "%SUBQUERY:" in k:
+            parts.pop(k)
 
     return parts
 

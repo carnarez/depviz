@@ -210,7 +210,8 @@ $ python script.py fact_*.sql dim_*.sql
 **Functions**
 
 - [`clean_query()`](#sql_to_jsonclean_query): Deep-cleaning of a SQL query via
-- [`clean_functions()`](#sql_to_jsonclean_functions): Replace
+- [`clean_functions()`](#sql_to_jsonclean_functions): Escape `FROM` operators in SQL
+  functions.
 - [`split_query()`](#sql_to_jsonsplit_query): Split a query in its subqueries, if any.
 - [`fetch_dependencies()`](#sql_to_jsonfetch_dependencies): Fetch upstream dependencies
   from each subquery.
@@ -257,7 +258,7 @@ and regular expressions.
 clean_functions(query: str) -> str:
 ```
 
-Replace
+Escape `FROM` operators in SQL functions.
 
 **Parameters**
 
@@ -358,7 +359,7 @@ Some test regarding our little SQL parsing.
 - [`test_create_view()`](#test_sql_to_jsontest_create_view): Test for
   `CREATE [OR REPLACE] VIEW` statements.
 - [`test_false_positive_from()`](#test_sql_to_jsontest_false_positive_from): Test to
-  except `FUNC(... FROM ...)` statements
+  except `FUNCTION(... FROM ...)` statements.
 - [`test_subqueries()`](#test_sql_to_jsontest_subqueries): Test for subqueries (CTE),
   _e.g._, statement including a `WITH` clause.
 
@@ -495,6 +496,10 @@ test_create_materialized_view():
 Test for `CREATE MATERIALIZED VIEW` statement.
 
 ```sql
+create materialized view materialized_view as (select * from external_table)
+```
+
+```sql
 create materialized view materialized_view
 backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
 select * from external_table
@@ -534,7 +539,7 @@ create view simple_view as select * from static_table
 test_false_positive_from():
 ```
 
-Test to except `FUNC(... FROM ...)` statements
+Test to except `FUNCTION(... FROM ...)` statements.
 
 ```sql
 select

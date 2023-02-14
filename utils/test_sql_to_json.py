@@ -221,20 +221,29 @@ def test_create_materialized_view():
     """Test for `CREATE MATERIALIZED VIEW` statement.
 
     ```sql
+    create materialized view materialized_view as (select * from external_table)
+    ```
+
+    ```sql
     create materialized view materialized_view
     backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
     select * from external_table
     ```
     """
-    q = """
-    create materialized view materialized_view
-    backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
-    select * from external_table
-    """
+    for q in (
+        "create materialized view materialized_view as (select * from external_table)",
+        " ".join(
+            (
+                "create materialized view materialized_view",
+                "backup no diststyle key distkey (attr) sortkey (attr1, attr2) as",
+                "select * from external_table",
+            )
+        ),
+    ):
 
-    q, s, d = _process(q)
+        q, s, d = _process(q)
 
-    assert d == {"materialized_view": ["external_table"]}
+        assert d == {"materialized_view": ["external_table"]}
 
 
 def test_create_table():
@@ -271,7 +280,7 @@ def test_create_view():
 
 
 def test_false_positive_from():
-    """Test to except `FUNC(... FROM ...)` statements
+    """Test to except `FUNCTION(... FROM ...)` statements.
 
     ```sql
     select
