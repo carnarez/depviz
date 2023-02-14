@@ -311,9 +311,9 @@ def fetch_dependencies(parts: dict[str, list[str]]) -> dict[str, list[str]]:
     for n, p in parts.items():
         if any([f" {k} " in p.lower() for k in ("from", "join", "location")]):
             for r in (
-                r"from\s+([^\s(]+)",
-                r"join\s+([^\s(]+)",
-                r"location\s+'(s3://.+)'",
+                r"\s+from\s+([^\s(]+)",
+                r"\s+join\s+([^\s(]+)",
+                r"\s+location\s+'(s3://.+)'",
             ):
                 for m in re.finditer(r, p, flags=re.IGNORECASE):
                     if n in tree:

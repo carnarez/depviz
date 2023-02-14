@@ -359,8 +359,8 @@ Some test regarding our little SQL parsing.
   statement.
 - [`test_create_view()`](#test_sql_to_jsontest_create_view): Test for
   `CREATE [OR REPLACE] VIEW` statements.
-- [`test_false_positive_from()`](#test_sql_to_jsontest_false_positive_from): Test to
-  except `FUNCTION(... FROM ...)` statements.
+- [`test_false_positive_from()`](#test_sql_to_jsontest_false_positive_from): Test the
+  exclusion of `..._from` attributes or `FUNCTION(... FROM ...)` clauses.
 - [`test_subqueries()`](#test_sql_to_jsontest_subqueries): Test for subqueries (CTE),
   _e.g._, statement including a `WITH` clause.
 
@@ -540,7 +540,13 @@ create view simple_view as select * from static_table
 test_false_positive_from():
 ```
 
-Test to except `FUNCTION(... FROM ...)` statements.
+Test the exclusion of `..._from` attributes or `FUNCTION(... FROM ...)` clauses.
+
+```sql
+select * from table t
+right join valid_from vf
+on t.attr = vf.attr and extract(month from vf.datetime) > 6
+```
 
 ```sql
 select

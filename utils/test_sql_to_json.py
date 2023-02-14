@@ -280,7 +280,13 @@ def test_create_view():
 
 
 def test_false_positive_from():
-    """Test to except `FUNCTION(... FROM ...)` statements.
+    """Test the exclusion of `..._from` attributes or `FUNCTION(... FROM ...)` clauses.
+
+    ```sql
+    select * from table t
+    right join valid_from vf
+    on t.attr = vf.attr and extract(month from vf.datetime) > 6
+    ```
 
     ```sql
     select
@@ -289,6 +295,18 @@ def test_false_positive_from():
     from table
     ```
     """
+    # first
+    q = """
+    select * from table t
+    right join valid_from vf
+    on t.attr = vf.attr and extract(month from vf.datetime) > 6
+    """
+
+    q, s, d = _process(q)
+
+    assert d == {"SELECT": ["table", "valid_from"]}
+
+    # second
     q = """
     select
       extract(year from datetime),
