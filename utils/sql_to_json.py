@@ -70,20 +70,22 @@ def clean_query(query: str) -> str:
           concatenation operators;
         * `"(.*)\s*::\s*(.*)"` -> `"[...]::[...]"`: remove spaces around datatyping
           operators;
-        * `"[\s]+"` -> `" "`: replace multiple spaces by single spaces.
+        * `"[\s]+"` -> `" "`: replace multiple spaces by single spaces;
+        * `";$"` -> `""`: remove final semicolumn (`;`).
     """
     # good effort, but does not know some functions/keywords
     q = sqlparse.format(query, keyword_case="lower", strip_comments=True)
 
     # regular cleaning
     q = re.sub(r"/\*.*\*/", "", q, flags=re.DOTALL)
-    q = re.sub(r"--.*", "", q)
+    q = re.sub("--.*", "", q)
     q = re.sub("([(,)])", r" \1 ", q)
     q = re.sub(r"([A-Za-z0-9_]+)\s*\.\s*([A-Za-z0-9_]+)", r"\1.\2", q)
     q = re.sub(r"(.*)\s*[<=>]+\s*(.*)", r"\1 = \2", q)
     q = re.sub(r"(.*)\s*\|\|\s*(.*)", r"\1 || \2", q)
     q = re.sub(r"(.*)\s*::\s*(.*)", r"\1::\2", q)
     q = re.sub(r"[\s]+", " ", q)
+    q = re.sub(";$", "", q)
     q = q.strip()
 
     return q

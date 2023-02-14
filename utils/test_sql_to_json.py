@@ -227,7 +227,7 @@ def test_create_materialized_view():
     ```sql
     create materialized view materialized_view
     backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
-    select * from external_table
+    select * from external_table;
     ```
     """
     for q in (
@@ -236,7 +236,7 @@ def test_create_materialized_view():
             (
                 "create materialized view materialized_view",
                 "backup no diststyle key distkey (attr) sortkey (attr1, attr2) as",
-                "select * from external_table",
+                "select * from external_table;",
             )
         ),
     ):

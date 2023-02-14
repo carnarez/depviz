@@ -250,7 +250,8 @@ and regular expressions.
      operators;
    - `"(.*)\s*::\s*(.*)"` -> `"[...]::[...]"`: remove spaces around datatyping
      operators;
-   - `"[\s]+"` -> `" "`: replace multiple spaces by single spaces.
+   - `"[\s]+"` -> `" "`: replace multiple spaces by single spaces;
+   - `";$"` -> `""`: remove final semicolumn (`;`).
 
 ### `sql_to_json.clean_functions`
 
@@ -502,7 +503,7 @@ create materialized view materialized_view as (select * from external_table)
 ```sql
 create materialized view materialized_view
 backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
-select * from external_table
+select * from external_table;
 ```
 
 ### `test_sql_to_json.test_create_table`
