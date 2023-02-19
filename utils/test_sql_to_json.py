@@ -343,7 +343,35 @@ def test_subqueries():
     left join (select * from subquery2) s2
     on s1.attr1 = s2.attr1
     ```
+
+    ```sql
+    with
+      subquery1 as (
+        select extract(day from attr) as day
+        from table1
+      ),
+      subquery2 as (
+        select attr
+        from table2 t2
+        left join table3
+        on t2.attr = t3.attr
+      ),
+      subquery3 as (
+        select attr
+        from table4
+      )
+    select distinct
+      s1.attr,
+      s2.attr,
+      s3.attr
+    from subquery1 s1
+    inner join subquery2 s2
+    on s1.attr = s2.attr
+    right join subquery3 s3
+    on s2.attr = s3.attr
+    ```
     """
+    # 1
     q = """
     with
       subquery1 as (
@@ -371,4 +399,41 @@ def test_subqueries():
         "subquery1": ["table1", "table2"],
         "subquery2": ["table3"],
         "SELECT": ["subquery1", "subquery2"],
+    }
+
+    # 2
+    q = """
+    with
+      subquery1 as (
+        select extract(day from attr) as day
+        from table1
+      ),
+      subquery2 as (
+        select attr
+        from table2 t2
+        left join table3
+        on t2.attr = t3.attr
+      ),
+      subquery3 as (
+        select attr
+        from table4
+      )
+    select distinct
+      s1.attr,
+      s2.attr,
+      s3.attr
+    from subquery1 s1
+    inner join subquery2 s2
+    on s1.attr = s2.attr
+    right join subquery3 s3
+    on s2.attr = s3.attr
+    """
+
+    q, s, d = _process(q)
+
+    assert d == {
+        "subquery1": ["table1"],
+        "subquery2": ["table2", "table3"],
+        "subquery3": ["table4"],
+        "SELECT": ["subquery1", "subquery2", "subquery3"],
     }
