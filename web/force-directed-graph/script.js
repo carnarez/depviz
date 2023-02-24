@@ -259,10 +259,11 @@ const toJSON = (rawData, inputFormat, reverseTree) => {
                 }
 
                 // add relationship between objects to the list of links
+                // weirdly enough this is the direction required by the plotting script
                 const l = `${p}-${c}`;
                 if (!links.includes(l)) {
                     links.push(l);
-                    data.links.push({"id": l, "source": p, "target": c});
+                    data.links.push({"id": l, "source": c, "target": p});
                 }
 
             });
