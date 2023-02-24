@@ -1,19 +1,15 @@
-article > * {
+article #depviz {
   max-width: 100%;
+  margin: 0;
   overflow-x: hidden;
   padding: 0;
 }
 
-#depviz > *:not(#depviz-graph),
-.maintext > *:not(#depviz),
-.prevnext {
-  margin: 0 auto;
-  max-width: var(--max-width);
-  padding: 1rem;
-  width: 100%;
+#depviz > * {
+  margin: 1rem 0;
 }
 
-.depviz-labels {
+#depviz .depviz-labels {
   background-color: var(--background-color);
   color: var(--font-color);
   font-family: var(--font-family);

@@ -1,3 +1,17 @@
+The implementation below is Based on the
+[`3d-force-graph`](https://github.com/vasturiano/3d-force-graph) package, itself carried
+by [`three.js`](https://github.com/mrdoob/three.js) and its WebGL rendering.
+
+<details markdown="1">
+  <summary>What do I do?</summary>
+
+Stick your data below. Expected in either the CSV format (each line carrying a pair of
+`parent,child` or `child,parent`; check the right button below) or JSON (each key being
+a parent and corresponding value an array of children
+`{parent: [child, child, ...], parent: [...]}`, or a child and corresponding value an
+array of parents `{child: [parent, parent, ...], child: [...]}`). Keep it consistent, no
+mixing between these formats.
+
 Stick your data below. Expected in either the CSV format (each line carrying a pair of
 `parent,child` or `child,parent`; check the right button below) or JSON (each key being
 a parent and corresponding value an array of children
@@ -8,6 +22,8 @@ mixing between these formats.
 Use the checkbox if you want to _explicitely_ show the node names instead of keeping
 them as hovered labels. Keep it mind that might become unreadable for large number of
 nodes.
+
+</details>
 
 In blue the parent(s), in red the child(ren). Taking the database concepts this was
 initially written for, in blue the object(s) the current object depends on, and in red

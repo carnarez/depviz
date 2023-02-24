@@ -1,20 +1,16 @@
-article > * {
+article #depviz {
   max-width: 100%;
+  margin: 0;
   overflow-x: hidden;
   padding: 0;
 }
 
-#depviz > *:not(#depviz-graph),
-.maintext > *:not(#depviz),
-.prevnext {
-  margin: 0 auto;
-  max-width: var(--max-width);
-  padding: 1rem;
-  width: 100%;
+#depviz > * {
+  margin: 1rem 0;
 }
 
 #mermaid-diagram {
-    margin: 2rem auto;
+  margin: 2rem auto;
 }
 
 #depviz-form input[type=radio]#depviz-lr + label {
