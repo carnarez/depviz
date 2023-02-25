@@ -1,6 +1,7 @@
-The implementation below is Based on the
+The implementation below is based on the
 [`3d-force-graph`](https://github.com/vasturiano/3d-force-graph) package, itself carried
-by [`three.js`](https://github.com/mrdoob/three.js) and its WebGL rendering.
+by [`three.js`](https://github.com/mrdoob/three.js) and its
+[WebGL](https://www.khronos.org/webgl/) rendering.
 
 <details markdown="1">
   <summary>What do I do?</summary>
