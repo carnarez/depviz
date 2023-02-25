@@ -9,8 +9,9 @@ Stick your data below. Expected in either the CSV format (each line carrying a p
 `parent,child` or `child,parent`; check the right button below) or JSON (each key being
 a parent and corresponding value an array of children
 `{parent: [child, child, ...], parent: [...]}`, or a child and corresponding value an
-array of parents `{child: [parent, parent, ...], child: [...]}`). Keep it consistent, no
-mixing between these formats.
+array of parents `{child: [parent, parent, ...], child: [...]}`).
+
+Keep it consistent, no mixing between these formats.
 
 Diagram orientation can be selected using the arrows below (click on your choice). The
 resulting `Mermaid` code will be dumped to the console.

@@ -17,6 +17,14 @@ article .maintext > #depviz > *:not(#depviz-graph) {
   max-width: calc(var(--max-width) - 2rem);
 }
 
+@media screen and (max-width: 1000px) {
+  article .maintext > *:not(#depviz),
+  article .maintext > #depviz > *:not(#depviz-graph) {
+    margin: 1rem;
+    max-width: var(--max-width);
+  }
+}
+
 #mermaid-diagram {
   margin: 2rem auto;
 }
