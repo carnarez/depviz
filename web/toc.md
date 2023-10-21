@@ -1,5 +1,4 @@
 - [Home](/)
-- [Directed acyclic graph](/directed-acyclic-graph)
 - [Force-directed graph](/force-directed-graph)
 - [Graphviz](/graphviz-graph)
 - [Hierarchical edge bundling](/hierarchical-edge-bundling)

@@ -23,15 +23,6 @@ to plot such networks.
 
 #### Visualisation options
 
-##### [Directed acyclic graph](/directed-acyclic-graph) (WIP)
-
-Also called _Sugiyama_ after the author of the original publication solving the layout
-optimization problem back in the days. [^3]
-
-The implementation uses the [`d3-dag`](https://github.com/erikbrinkman/d3-dag) package.
-Check some more fun examples on
-[Observable](https://observablehq.com/search?query=d3-dag).
-
 ##### [Force-directed graph](/force-directed-graph)
 
 In 3D.
@@ -53,7 +44,7 @@ Beware, expect old-school graphics.
 ##### [Hierarchical edge bundling](/hierarchical-edge-bundling)
 
 My personal favourite to visualise multilevel dependency networks. According to the
-author of [_From Data to Viz_](https://www.data-to-viz.com/): [^4]
+author of [_From Data to Viz_](https://www.data-to-viz.com/): [^3]
 
 > Hierarchical edge bundling allows visualising adjacency relations between entities
 > organized in a hierarchy. The idea is to bundle the adjacency edges together to
@@ -62,6 +53,9 @@ author of [_From Data to Viz_](https://www.data-to-viz.com/): [^4]
 Well said.
 
 ##### [`Mermaid`](/mermaid-flowchart)
+
+Following the _Sugiyama_ method after the author of the original publication solving the
+layout optimization problem back in the days. [^4]
 
 Graph built via [`Mermaid`](https://github.com/mermaid-js/mermaid)
 ([docs](https://mermaid.js.org/)), a somewhat broader implementation of the DAG solution
@@ -122,6 +116,6 @@ Again, this works for _me_ and my current projects! No other claims nor guarante
       advertisement though, simply what I am currently working with.
 [^2]: Mostly done using [D3](https://d3js.org/) because this library rocks, and the SVG
       format is fun to work with.
-[^3]: _Methods for Visual Understanding of Hierarchical System Structures_ by Sugiyama
+[^3]: The quote from the [source](https://www.data-to-viz.com/graph/edge_bundling.html).
+[^4]: _Methods for Visual Understanding of Hierarchical System Structures_ by Sugiyama
       _et al._, 1981
-[^4]: The quote from the [source](https://www.data-to-viz.com/graph/edge_bundling.html).
