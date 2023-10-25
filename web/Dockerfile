@@ -2,19 +2,17 @@
 
 FROM python:slim as render
 
-ENV URL=git+https://github.com/carnarez/
-
 WORKDIR /usr/src
 
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes git \
  && pip install -U pip \
- && pip install --no-cache-dir $URL/astdocs@master \
-                               $URL/markdown-extension-astdocs@master \
-                               $URL/markdown-extension-img@master \
-                               $URL/markdown-extension-insert@master \
-                               $URL/markdown-extension-script@master \
-                               $URL/markdown-render@master \
+ && pip install --no-cache-dir git+https://github.com/carnarez/astdocs@master \
+                               git+https://github.com/carnarez/markdown-extension-astdocs@master \
+                               git+https://github.com/carnarez/markdown-extension-img@master \
+                               git+https://github.com/carnarez/markdown-extension-insert@master \
+                               git+https://github.com/carnarez/markdown-extension-script@master \
+                               git+https://github.com/carnarez/markdown-render@master \
                                jinja2 \
                                lunr \
                                markdown \
