@@ -7,20 +7,19 @@ ENV URL=git+https://github.com/carnarez/
 WORKDIR /usr/src
 
 RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes git wget \
+ && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --yes git \
  && pip install -U pip \
  && pip install --no-cache-dir $URL/astdocs@master \
-                               $URL/markdown-astdocs@master \
-                               $URL/markdown-img@master \
-                               $URL/markdown-insert@master \
-                               $URL/markdown-script@master \
+                               $URL/markdown-extension-astdocs@master \
+                               $URL/markdown-extension-img@master \
+                               $URL/markdown-extension-insert@master \
+                               $URL/markdown-extension-script@master \
+                               $URL/markdown-render@master \
                                jinja2 \
                                lunr \
                                markdown \
                                pymdown-extensions \
-                               pyyaml \
- && wget --quiet https://raw.githubusercontent.com/carnarez/markdown-render/master/build/render.py \
- && wget --quiet https://raw.githubusercontent.com/carnarez/markdown-render/master/build/template.html
+                               pyyaml 
 
 COPY . .
 
@@ -38,31 +37,31 @@ RUN git clone --filter=blob:none --quiet https://github.com/carnarez/depviz.git 
       cat front-matter.md $f > /tmp/md; \
       mv /tmp/md $f; \
     done \
- && python render.py --meta="splash=nosplash" --prefix=/var/www `find . -name "*.md" | grep -e front-matter.md -e toc.md -v`
+ && render-markdown --meta="splash=nosplash" --prefix=/var/www `find . -name "*.md" | grep -e front-matter.md -e toc.md -v`
 
 
 # minify everything in place
 
 FROM node:alpine as bundle
 
-ENV URL=https://raw.githubusercontent.com/carnarez/markdown-render/master/style/
-
 WORKDIR /var/www
-
-RUN npm config set update-notifier false \
- && npm install --global --no-audit --no-fund autoprefixer clean-css-cli html-minifier postcss-cli terser | grep -v ^$ \
- && wget --quiet $URL/style.css -O _style.css \
- && wget --quiet $URL/style-highlight.css -O _style-highlight.css \
- && wget --quiet $URL/style-markdown.css -O _style-markdown.css \
- && wget --quiet $URL/style-search.css -O _style-search.css
 
 COPY --from=render /var/www .
 
 COPY . .
 
 RUN rm `find . -name "*.md"` \
- && cat _style.css _style-*.css | grep -v '@import ".*"' > _bundle.css \
- && rm _style.css _style-*.css \
+ && apk --no-cache add git \
+ && npm config set update-notifier false \
+ && npm install --global --no-audit --no-fund autoprefixer \
+                                              clean-css-cli \
+                                              html-minifier \
+                                              postcss-cli \
+                                              terser \
+    | grep -v ^$ \
+ && git clone --depth=1 https://github.com/carnarez/markdown-render-styling.git \
+ && cat markdown-render-styling/style.css markdown-render-styling/style-*.css | grep -v '@import ".*"' > _bundle.css \
+ && rm -fr markdown-render-styling \
  && cat *.css > bundle.css_ \
  && rm *.css \
  && mv bundle.css_ style.css \
