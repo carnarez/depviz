@@ -59,9 +59,8 @@ RUN rm `find . -name "*.md"` \
     | grep -v ^$ \
  && git clone --depth=1 https://github.com/carnarez/markdown-render-styling.git \
  && cat markdown-render-styling/style.css markdown-render-styling/style-*.css | grep -v '@import ".*"' > _bundle.css \
- && rm -fr markdown-render-styling \
  && cat *.css > bundle.css_ \
- && rm *.css \
+ && rm -fr markdown-render-styling *.css \
  && mv bundle.css_ style.css \
  && find . -name "*.css" | while read f; do \
       postcss $f --replace --use autoprefixer; \
@@ -70,9 +69,9 @@ RUN rm `find . -name "*.md"` \
  && find . -name "*.html" | while read f; do \
       html-minifier --collapse-boolean-attributes \
                     --collapse-whitespace \
-                    --output $f \
                     --minify-css true \
                     --minify-js true \
+                    --output $f \
                     --remove-attribute-quotes \
                     --remove-comments \
                     --remove-empty-attributes \
