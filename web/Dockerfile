@@ -35,7 +35,8 @@ RUN git clone --filter=blob:none --quiet https://github.com/carnarez/depviz.git 
       cat front-matter.md $f > /tmp/md; \
       mv /tmp/md $f; \
     done \
- && render-markdown --meta="splash=nosplash" --prefix=/var/www `find . -name "*.md" | grep -e front-matter.md -e toc.md -v`
+ && render-markdown --meta="splash=nosplash" \
+                    --prefix=/var/www `find . -name "*.md" | grep -e front-matter.md -e toc.md -v`
 
 
 # minify everything in place
@@ -57,7 +58,7 @@ RUN rm `find . -name "*.md"` \
                                               postcss-cli \
                                               terser \
     | grep -v ^$ \
- && git clone --branch=bundle --depth=1 https://github.com/carnarez/markdown-render-styling.git
+ && git clone --branch=bundle --depth=1 https://github.com/carnarez/markdown-render-styling.git \
  && cat markdown-render-styling/style.css *.css 2>/dev/null | grep -v '@import url("style-' > style.css_ \
  && rm -fr markdown-render-styling *.css \
  && mv style.css_ style.css \

@@ -1,26 +1,26 @@
-article .maintext {
+article > div:first-child {
   max-width: 100%;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
-article .maintext #depviz {
+article > div:first-child #depviz {
   max-width: 100%;
+  padding: 0;
   margin: 0;
   overflow-x: hidden;
-  padding: 0;
 }
 
-article .maintext > *:not(#depviz),
-article .maintext > #depviz > *:not(#depviz-graph) {
+article > div:first-child > *:not(#depviz),
+article > div:first-child > #depviz > *:not(#depviz-graph) {
+  max-width: calc(var(--article-width) - 2rem);
   margin: 1rem auto;
-  max-width: calc(var(--max-width) - 2rem);
 }
 
-@media screen and (max-width: 1000px) {
-  article .maintext > *:not(#depviz),
-  article .maintext > #depviz > *:not(#depviz-graph) {
+@media screen and (width <= 1000px) {
+  article > div:first-child > *:not(#depviz),
+  article > div:first-child > #depviz > *:not(#depviz-graph) {
+    max-width: var(--article-width);
     margin: 1rem;
-    max-width: var(--max-width);
   }
 }

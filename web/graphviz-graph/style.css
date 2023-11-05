@@ -1,86 +1,86 @@
-article .maintext {
+article > div:first-child {
   max-width: 100%;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
-article .maintext #depviz {
+article > div:first-child #depviz {
   max-width: 100%;
+  padding: 0;
   margin: 0;
   overflow-x: hidden;
-  padding: 0;
 }
 
-article .maintext > *:not(#depviz),
-article .maintext > #depviz > *:not(#depviz-graph) {
+article > div:first-child > *:not(#depviz),
+article > div:first-child > #depviz > *:not(#depviz-graph) {
+  max-width: calc(var(--article-width) - 2rem);
   margin: 1rem auto;
-  max-width: calc(var(--max-width) - 2rem);
 }
 
-@media screen and (max-width: 1000px) {
-  article .maintext > *:not(#depviz),
-  article .maintext > #depviz > *:not(#depviz-graph) {
-    margin: 1rem;
-    max-width: var(--max-width);
-  }
-}
-
-#depviz-graph {
+article > div:first-child #depviz-graph {
   margin: 2rem auto;
 }
 
-#depviz-form .depviz-dropdown {
-  cursor: pointer;
-  display: inline-block;
+article > div:first-child #depviz-form .depviz-dropdown {
   position: relative;
+  display: inline-block;
   margin: 0 0 0 1rem;
   text-align: left;
+  cursor: pointer;
 }
 
-#depviz-form .depviz-dropdown #depviz-engine::before,
-#depviz-form .depviz-dropdown #depviz-engine::after {
-  font-family: "Font Awesome 6 Free";
+article > div:first-child #depviz-form .depviz-dropdown #depviz-engine::before,
+article > div:first-child #depviz-form .depviz-dropdown #depviz-engine::after {
+  font-family: "Font Awesome 6 Free", serif;
   font-size: var(--font-size);
   font-weight: 900;
 }
 
-#depviz-form .depviz-dropdown #depviz-engine::before {
+article > div:first-child #depviz-form .depviz-dropdown #depviz-engine::before {
+  margin: 0 0.5rem 0 0;
   color: var(--link-color);
   content: "\f013";
-  margin: 0 0.5rem 0 0;
 }
 
-#depviz-form .depviz-dropdown #depviz-engine::after {
-  content: "\f078";
+article > div:first-child #depviz-form .depviz-dropdown #depviz-engine::after {
   margin: 0 0 0 0.5rem;
+  content: "\f078";
   opacity: 0.5;
 }
 
-#depviz-form .depviz-dropdown:hover #depviz-engine::after {
+article > div:first-child #depviz-form .depviz-dropdown:hover #depviz-engine::after {
   opacity: 1;
 }
 
-#depviz-form .depviz-dropdown .depviz-dropdown-content {
-  border-color: var(--background-color);
-  border-radius: 5px;
-  border-style: solid;
-  border-width: 1px;
-  background-color: var(--background-color-alt);
-  display: none;
-  padding: 0.5rem;
+article > div:first-child #depviz-form .depviz-dropdown .depviz-dropdown-content {
   position: absolute;
   right: 0;
   z-index: 9;
+  display: none;
+  padding: 0.5rem;
+  background-color: var(--background-color-alt);
+  border-color: var(--background-color);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 5px;
 }
 
-#depviz-form .depviz-dropdown .depviz-dropdown-content span {
+article > div:first-child #depviz-form .depviz-dropdown .depviz-dropdown-content span {
   padding: 1rem;
 }
 
-#depviz-form .depviz-dropdown .depviz-dropdown-content span:hover {
+article > div:first-child #depviz-form .depviz-dropdown .depviz-dropdown-content span:hover {
   color: var(--link-color);
 }
 
-#depviz-form .depviz-dropdown:hover .depviz-dropdown-content {
+article > div:first-child #depviz-form .depviz-dropdown:hover .depviz-dropdown-content {
   display: block;
+}
+
+@media screen and (width <= 1000px) {
+  article > div:first-child > *:not(#depviz),
+  article > div:first-child > #depviz > *:not(#depviz-graph) {
+    max-width: var(--article-width);
+    margin: 1rem;
+  }
 }
