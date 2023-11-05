@@ -363,10 +363,10 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
         document.querySelectorAll("article > *:not(div:first-child)").forEach(e => {
             e.style.display = "none";
         });
-        document.querySelectorAll(".maintext > *:not(#depviz)").forEach(e => {
+        document.querySelectorAll("article > div:first-child > *:not(#depviz)").forEach(e => {
             e.style.display = "none";
         });
-        document.querySelectorAll("#depviz > *:not(#depviz-graph)").forEach(e => {
+        document.querySelectorAll("article > div:first-child > #depviz > *:not(#depviz-graph)").forEach(e => {
             e.style.display = "none";
         });
         document.getElementById("depviz").style.margin = 0;
