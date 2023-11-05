@@ -49,9 +49,10 @@ jobs:
       - name: Render and bundle
         run: |
           # generate the documentation
+          mkdir web/utils
+          cp utils/*.py web/utils
+            
           (
-            mkdir web/utils
-            cp utils/*.py web/utils
             cd web/utils
             ASTDOCS_WITH_LINENOS=1 astdocs . > index.md
             mv *.py ..
@@ -127,5 +128,6 @@ jobs:
         run: |
           (
             cd web
+            
             ghp-import --branch www --force --push /tmp/www
           )
