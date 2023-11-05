@@ -1,64 +1,64 @@
-article .maintext {
+article > div:first-child {
   max-width: 100%;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
-article .maintext #depviz {
+article > div:first-child #depviz {
   max-width: 100%;
+  padding: 0;
   margin: 0;
   overflow-x: hidden;
-  padding: 0;
 }
 
-article .maintext > *:not(#depviz),
-article .maintext > #depviz > *:not(#depviz-graph) {
+article > div:first-child > *:not(#depviz),
+article > div:first-child > #depviz > *:not(#depviz-graph) {
+  max-width: calc(var(--article-width) - 2rem);
   margin: 1rem auto;
-  max-width: calc(var(--max-width) - 2rem);
 }
 
-@media screen and (max-width: 1000px) {
-  article .maintext > *:not(#depviz),
-  article .maintext > #depviz > *:not(#depviz-graph) {
-    margin: 1rem;
-    max-width: var(--max-width);
-  }
-}
-
-#mermaid-diagram {
+article > div:first-child #mermaid-diagram {
   margin: 2rem auto;
 }
 
-#depviz-form input[type=radio]#depviz-lr + label {
+article > div:first-child #depviz-form input[type="radio"]#depviz-lr + label {
   margin: 0 0 0 1rem;
 }
 
-#depviz-form input[type=radio]#depviz-tb + label,
-#depviz-form input[type=radio]#depviz-rl + label,
-#depviz-form input[type=radio]#depviz-bt + label {
+article > div:first-child #depviz-form input[type="radio"]#depviz-tb + label,
+article > div:first-child #depviz-form input[type="radio"]#depviz-rl + label,
+article > div:first-child #depviz-form input[type="radio"]#depviz-bt + label {
   margin: 0;
 }
 
-#depviz-form input[type=radio]#depviz-lr + label::before,
-#depviz-form input[type=radio]#depviz-tb + label::before,
-#depviz-form input[type=radio]#depviz-rl + label::before,
-#depviz-form input[type=radio]#depviz-bt + label::before {
-  font-weight: 900;
+article > div:first-child #depviz-form input[type="radio"]#depviz-lr + label::before,
+article > div:first-child #depviz-form input[type="radio"]#depviz-tb + label::before,
+article > div:first-child #depviz-form input[type="radio"]#depviz-rl + label::before,
+article > div:first-child #depviz-form input[type="radio"]#depviz-bt + label::before {
   margin: 0 0.25rem 0 0;
+  font-weight: 900;
 }
 
-#depviz-form input[type=radio]#depviz-lr + label::before {
+article > div:first-child #depviz-form input[type="radio"]#depviz-lr + label::before {
   content: "\f061";
 }
 
-#depviz-form input[type=radio]#depviz-tb + label::before {
+article > div:first-child #depviz-form input[type="radio"]#depviz-tb + label::before {
   content: "\f063";
 }
 
-#depviz-form input[type=radio]#depviz-rl + label::before {
+article > div:first-child #depviz-form input[type="radio"]#depviz-rl + label::before {
   content: "\f060";
 }
 
-#depviz-form input[type=radio]#depviz-bt + label::before {
+article > div:first-child #depviz-form input[type="radio"]#depviz-bt + label::before {
   content: "\f062";
+}
+
+@media screen and (width <= 1000px) {
+  article > div:first-child > *:not(#depviz),
+  article > div:first-child > #depviz > *:not(#depviz-graph) {
+    max-width: var(--article-width);
+    margin: 1rem;
+  }
 }

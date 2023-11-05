@@ -1,10 +1,10 @@
-#depviz,
-.depviz-buttons,
-#depviz-form {
+article #depviz,
+article .depviz-buttons,
+article #depviz-form {
   text-align: center;
 }
 
-.depviz-buttons a {
+article .depviz-buttons a {
   background-color: var(--background-color-alt);
   border-color: transparent;
   border-radius: 2rem;
@@ -13,69 +13,71 @@
   color: var(--font-color);
   margin: 0 0.5rem;
   padding: 0.5rem 1.5rem;
+  text-decoration-line: none;
 }
 
-.depviz-buttons a:focus,
-.depviz-buttons a:hover {
+article .depviz-buttons a:focus,
+article .depviz-buttons a:hover {
   border-color: var(--link-color);
+  text-decoration-line: none;
 }
 
-#depviz-form input[type=checkbox],
-#depviz-form input[type=radio] {
+article #depviz-form input[type=checkbox],
+article #depviz-form input[type=radio] {
   appearance: none;
   background-color: transparent;
   margin: 0;
 }
 
-#depviz-form label {
+article #depviz-form label {
   margin: 0 1rem;
 }
 
-#depviz-form label:hover,
-#depviz-form label:hover:before {
+article #depviz-form label:hover,
+article #depviz-form label:hover:before {
   cursor: pointer;
 }
 
-#depviz-form label::before {
+article #depviz-form label::before {
   font-family: "Font Awesome 6 Free";
   font-size: var(--font-size);
   font-weight: 400;
   margin: 0 0.5rem 0 0;
 }
 
-#depviz-form input[type=checkbox]:checked + label,
-#depviz-form input[type=radio]:checked + label,
-#depviz-form input[type=checkbox]:not(checked) + label:hover,
-#depviz-form input[type=radio]:not(checked) + label:hover {
+article #depviz-form input[type=checkbox]:checked + label,
+article #depviz-form input[type=radio]:checked + label,
+article #depviz-form input[type=checkbox]:not(checked) + label:hover,
+article #depviz-form input[type=radio]:not(checked) + label:hover {
   opacity: 1;
 }
 
-#depviz-form input[type=checkbox]:not(checked) + label,
-#depviz-form input[type=radio]:not(checked) + label {
+article #depviz-form input[type=checkbox]:not(checked) + label,
+article #depviz-form input[type=radio]:not(checked) + label {
   opacity: 0.5;
 }
 
-#depviz-form input[type=checkbox]:checked + label::before {
+article #depviz-form input[type=checkbox]:checked + label::before {
   color: var(--link-color);
   content: "\f14a";
 }
 
-#depviz-form input[type=checkbox]:not(checked) + label::before {
+article #depviz-form input[type=checkbox]:not(checked) + label::before {
   color: var(--font-color);
   content: "\f0c8";
 }
 
-#depviz-form input[type=radio]:checked + label::before {
+article #depviz-form input[type=radio]:checked + label::before {
   color: var(--link-color);
   content: "\f192";
 }
 
-#depviz-form input[type=radio]:not(checked) + label::before {
+article #depviz-form input[type=radio]:not(checked) + label::before {
   color: var(--font-color);
   content: "\f111";
 }
 
-#depviz-form textarea {
+article #depviz-form textarea {
   background-color: transparent;
   border-color: var(--font-color);
   border-radius: 5px;
@@ -90,11 +92,11 @@
   width: 100%;
 }
 
-#depviz-form textarea::placeholder {
+article #depviz-form textarea::placeholder {
   color: var(--font-color);
   opacity: 0.5;
 }
 
-#depviz-form textarea.error {
+article #depviz-form textarea.error {
   border-color: #ff7777;
 }

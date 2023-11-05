@@ -210,7 +210,7 @@ const drawGraph = (data, opts = {}) => {
             linkColor: computedStyle.getPropertyValue("--font-color"),
             colorIncoming: computedStyle.getPropertyValue("--link-color"),
             width: window.innerWidth,
-            height: window.innerHeight - document.querySelector("nav").getBoundingClientRect().height - 1,
+            height: window.innerHeight - document.querySelector("#topbar").getBoundingClientRect().height - 1,
             ...opts
         }
     )
@@ -360,7 +360,7 @@ document.getElementById("depviz-button").addEventListener("click", (event) => {
         drawGraph(data, opts);
 
         // remove the form and all other bottom stuff
-        document.querySelectorAll("article > *:not(.maintext)").forEach(e => {
+        document.querySelectorAll("article > *:not(div:first-child)").forEach(e => {
             e.style.display = "none";
         });
         document.querySelectorAll(".maintext > *:not(#depviz)").forEach(e => {
