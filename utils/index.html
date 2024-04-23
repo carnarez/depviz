@@ -1,0 +1,899 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>depviz</title><meta name=title content=depviz><meta name=description content="Visualise simple and complex dependencies online"><meta property=article:author content=carnarez><meta property=article:published_time content=2024-04-23><meta property=og:type content=article><meta property=og:url content=https://carnarez.github.io/depviz><meta property=og:title content=depviz><meta property=og:description content="Visualise simple and complex dependencies online"><meta property=og:image content=https://source.unsplash.com/1600x900/?forest><link rel=canonical href=https://carnarez.github.io/depviz><link rel=icon href=# type=image/png><link rel=stylesheet href=https://carnarez.github.io/depviz/style.css><link rel=stylesheet href=style.css><script>function setTheme(e){localStorage.setItem("theme",e),document.documentElement.className=e}function toggleTheme(){"light"===localStorage.getItem("theme")?setTheme("dark"):"dark"===localStorage.getItem("theme")?setTheme("dimmed"):setTheme("light")}"dark"===localStorage.getItem("theme")||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?setTheme("dark"):"dimmed"===localStorage.getItem("theme")?setTheme("dimmed"):setTheme("light")</script><script>var timer;window.addEventListener("scroll",()=>{const e=document.querySelector("#scroller"),o=document.querySelector("#topbar"),r=document.querySelector("#toc"),i=document.querySelector("article");var t,l;0<e.getBoundingClientRect().top?(e.style.width="0",document.querySelectorAll("aside, article").forEach(e=>{var t=e.className.match(/visible-sidebar/)||"";0<t.length&&e.classList.remove(t)}),r.scrollTop=0):(t=window.scrollY,l=o.offsetHeight+i.offsetHeight-window.innerHeight,e.style.width=100*Math.min(t/l,1)+"%",null!==timer&&clearTimeout(timer),timer=setTimeout(()=>{var t=i.querySelectorAll("h1, h2, h3, h4, h5, h6");for(let e=0;e<t.length;e++)if(0<t[e].getBoundingClientRect().top-parseInt(getComputedStyle(document.documentElement).scrollMarginTop)-1){0===e?history.pushState({},"",window.location.pathname):history.pushState({},"","#"+t[e-1].id);break}r.querySelectorAll("a").forEach(e=>{var t=e.getAttribute("href");t.startsWith("#")&&(t===window.location.hash?(e.classList.add("active"),(e.offsetTop<r.scrollTop+o.offsetHeight||e.offsetTop>window.innerHeight-o.offsetHeight)&&(r.scrollTop=e.offsetTop-2*o.offsetHeight)):e.classList.remove("active"))})},150))}),window.onload=()=>{const r=document.querySelector("#topbar"),i=document.querySelector("#toc"),e=i.querySelectorAll("a"),l=window.location.pathname.replace(/^[/]|[/]$/g,""),t=window.location.hash,c=(e.forEach(e=>{e.setAttribute("onclick","toggleSidebar('#toc')")}),[]),o=[];e.forEach(e=>{(e.getAttribute("href").startsWith("#")?o:c).push(e)}),c.forEach((e,t)=>{var o;e.getAttribute("href").replace(/^[/]|[/]$/g,"")===l&&(e.classList.add("active"),(e.offsetTop<i.scrollTop+r.offsetHeight||e.offsetTop>window.innerHeight-r.offsetHeight)&&(i.scrollTop=e.offsetTop-2*r.offsetHeight),0<t&&(e=c[t-1],o=document.querySelector("#prev"),localStorage.setItem("prev-content",e.href),o.href=e.href,o.text=e.text),t<c.length-1)&&(o=c[t+1],e=document.querySelector("#next"),localStorage.setItem("next-content",o.href),e.href=o.href,e.text=o.text)}),o.forEach(e=>{e.getAttribute("href")===t?(e.classList.add("active"),(e.offsetTop<i.scrollTop+r.offsetHeight||e.offsetTop>window.innerHeight-r.offsetHeight)&&(i.scrollTop=e.offsetTop-2*r.offsetHeight)):e.classList.remove("active")})}</script><script>window.addEventListener("keyup",e=>{var t=document.querySelector("#scroller"),o=e.key;0===t.getBoundingClientRect().top&&"BODY"===e.srcElement.tagName&&("<"===o?window.location.href=localStorage.getItem("prev-content")||"":">"===o?window.location.href=localStorage.getItem("next-content")||"":"."===o?toggleSidebar("#toc"):"?"===o&&toggleSidebar("#search")),"INPUT"===e.srcElement.tagName&&"Escape"===o&&e.srcElement.blur()})</script><script>function toggleSidebar(e,s=void 0){var i=document.querySelector("#scroller"),o=document.querySelector("aside"+e),e=document.querySelector(`aside:not(${e})`),l=document.querySelector("article");0<i.offsetTop&&window.scroll(0,i.offsetTop),e.classList.contains("visible-sidebar")&&(e.classList.remove("visible-sidebar"),l.classList.remove("visible-sidebar")),o.classList.contains("visible-sidebar")?(o.classList.remove("visible-sidebar"),l.classList.remove("visible-sidebar"),s=void 0):(o.classList.add("visible-sidebar"),l.classList.add("visible-sidebar")),void 0!==s?document.querySelector(s).focus():document.activeElement.blur()}</script><script>function lunrSearch(){fetch("https://carnarez.github.io/depviz/index.json").then(e=>e.json()).then(e=>{const t=e.documents,r=lunr.Index.load(e.indexed),i=[],a=document.querySelector("#search-input").value,c=document.querySelector("#search-output");2<a.length?(c.innerHTML=`<li>No results for "<i>${a}</i>" in current corpus.</li>`,r.search(a).forEach(a=>{const e=t[a.ref][0],c=t[a.ref][1],n=t[a.ref][2],s=parseFloat(a.score).toFixed(3);let l="";l=""===e?""!==c?"":"/":(""!==c?e+"/":e).replaceAll("/"," &gt; "),Object.keys(a.matchData.metadata).forEach(e=>{a.matchData.metadata[e].text.position.forEach(e=>{var t=document.createElement("li"),r=parseInt(e[0]),e=parseInt(e[1]);t.innerHTML=`
+                      <a class="search-result" href="https://carnarez.github.io/depviz/${a.ref}" onclick="toggleSidebar('#search')">
+                        <div class="title">${l}${c}</div>
+                        <div class="text">
+                          ${n.slice(Math.max(0,r-100),r)}
+                          <mark>${n.slice(r,r+e)}</mark>
+                          ${n.slice(r+e,Math.min(r+e+100,n.length))}
+                          <span class="score">${s}</span>
+                        </div>
+                      </a>
+                    `,i.push(t)})})}),0<i.length&&c.replaceChildren(...i)):c.replaceChildren()})}function resetSearch(){var e=document.querySelector("#search-input"),t=document.querySelector("#search-output");e.value="",e.focus(),t.replaceChildren()}</script><script defer src=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js onload=hljs.highlightAll()></script><script defer src=https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js></script><script defer src=https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js onload='renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}]})'></script><script defer src=https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js></script><script>function mermaidInitialize(){var e=getComputedStyle(document.documentElement),o=(e.getPropertyValue("--background-color"),e.getPropertyValue("--background-color-alt")),r=e.getPropertyValue("--font-color"),t=e.getPropertyValue("--font-family"),l=e.getPropertyValue("--font-size");e.getPropertyValue("--link-color");mermaid.initialize({theme:"base",themeVariables:{fontFamily:t,fontSize:l,lineColor:r,primaryColor:o,primaryBorderColor:r,primaryTextColor:r}})}</script><script defer src=https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js onload=mermaidInitialize()></script><nav id=topbar><div><a class=sidebar onclick='toggleSidebar("#toc")'></a> <a class=search onclick='toggleSidebar("#search","#search-input")'></a> <span class=spacer></span> <a class=logo href=https://carnarez.github.io/depviz><img src=""></a><span class=spacer></span> <a class=repo href=https://github.com/carnarez/depviz></a> <a class=theme onclick=toggleTheme()></a></div></nav><nav id=scroller></nav><main><aside id=toc><div class=toc><ul><li><a href=/depviz/ >Home</a><li><a href=/depviz/force-directed-graph>Force-directed graph</a><li><a href=/depviz/graphviz-graph>Graphviz</a><li><a href=/depviz/hierarchical-edge-bundling>Hierarchical edge bundling</a><li><a href=/depviz/mermaid-flowchart>Mermaid flowchart</a><li><a href=/depviz/utils>Tooling API</a><ul><li><a href=#module-csv_to_json>Module csv_to_json</a><ul><li><a href=#functions>Functions</a><ul><li><a href=#csv_to_jsonto_json>csv_to_json.to_json</a></ul></ul><li><a href=#module-filter_json>Module filter_json</a><ul><li><a href=#functions_1>Functions</a><ul><li><a href=#filter_jsonfilter_json>filter_json.filter_json</a></ul></ul><li><a href=#module-format_json>Module format_json</a><ul><li><a href=#functions_2>Functions</a><ul><li><a href=#format_jsonto_dot>format_json.to_dot</a><li><a href=#format_jsonto_mmd>format_json.to_mmd</a></ul></ul><li><a href=#module-sql_to_json>Module sql_to_json</a><ul><li><a href=#functions_3>Functions</a><ul><li><a href=#sql_to_jsonclean_query>sql_to_json.clean_query</a><li><a href=#sql_to_jsonclean_functions>sql_to_json.clean_functions</a><li><a href=#sql_to_jsonsplit_query>sql_to_json.split_query</a><li><a href=#sql_to_jsonfetch_dependencies>sql_to_json.fetch_dependencies</a></ul></ul><li><a href=#module-test_sql_to_json>Module test_sql_to_json</a><ul><li><a href=#functions_4>Functions</a><ul><li><a href=#test_sql_to_jsontest_convoluted_query>test_sql_to_json.test_convoluted_query</a><li><a href=#test_sql_to_jsontest_create_external_table>test_sql_to_json.test_create_external_table</a><li><a href=#test_sql_to_jsontest_create_materialized_view>test_sql_to_json.test_create_materialized_view</a><li><a href=#test_sql_to_jsontest_create_table>test_sql_to_json.test_create_table</a><li><a href=#test_sql_to_jsontest_create_view>test_sql_to_json.test_create_view</a><li><a href=#test_sql_to_jsontest_false_positive_from>test_sql_to_json.test_false_positive_from</a><li><a href=#test_sql_to_jsontest_subqueries>test_sql_to_json.test_subqueries</a></ul></ul></ul></ul></div></aside><aside id=search><header><a class=search onclick='document.querySelector("#search-input").focus()'></a> <input autocomplete=off id=search-input onkeyup=lunrSearch() placeholder="search with lunr"> <a class=reset onclick=resetSearch()></a></header><ul id=search-output></ul></aside><article><div><h1 id=module-csv_to_json>Module <code>csv_to_json</code></h1><p>Build an object -&gt; upstream dependencies JSON object from CSV content.<p><strong>Parameters</strong><ul><li>[<code>str</code>]: Path to the CSV file(s).</ul><p><strong>Returns</strong><ul><li>[<code>str</code>]: JSON-formatted, nested list of object and upstream dependencies (objects that are depended on).</ul><p><strong>Usage</strong><pre class=highlight><code class=language-shell>$ python script.py &lt;CSV FILE&gt; [&lt;CSV FILE&gt; [...]]</code></pre><p><strong>Example</strong><pre class=highlight><code class=language-shell>$ python script.py dependencies.csv
+$ python script.py file1.csv file2.csv file3.csv</code></pre><p><strong>Functions</strong><ul><li><a href=#csv_to_jsonto_json><code>to_json()</code></a>: Convert the CSV content to JSON.</ul><h2 id=functions>Functions</h2><h3 id=csv_to_jsonto_json><code>csv_to_json.to_json</code></h3><pre class=highlight><code class=language-python>to_json(content: str, objects: dict[str, list[str]]) -&gt; dict[str, list[str]]:</code></pre><p>Convert the CSV content to JSON.<p><strong>Parameters</strong><ul><li><code>content</code> [<code>str</code>]: The CSV content to parse and convert.<li><code>objects</code> [<code>dict[str, list[str]]</code>]: Dictionary of objects already parsed.</ul><p><strong>Returns</strong><ul><li>[<code>dict[str, list[str]]</code>]: Updated dictionary of objects and upstream dependencies.</ul><p><strong>Notes</strong><p>Expects a two columns dataset, each line embedding a <code>object1,object2</code> pair; the second object is expected to be depended upon.<details><summary>source</summary><pre class=highlight><code class=language-python>def to_json(content: str, objects: dict[str, list[str]]) -&gt; dict[str, list[str]]:
+    r"""Convert the CSV content to JSON.
+
+    Parameters
+    ----------
+    content : str
+        The CSV content to parse and convert.
+    objects : dict[str, list[str]]
+        Dictionary of objects already parsed.
+
+    Returns
+    -------
+    : dict[str, list[str]]
+        Updated dictionary of objects and upstream dependencies.
+
+    Notes
+    -----
+    Expects a two columns dataset, each line embedding a `object1,object2` pair; the
+    second object is expected to be depended upon.
+
+    """
+    for r in content.split("\n"):
+        if len(r.strip()):
+            c, p = r.split(",")
+
+            # list dependencies as parent -&gt; (list of) child(ren)
+            if p in objects:
+                objects[p].append(c)
+            else:
+                objects[p] = [c]
+
+    return objects</code></pre></details><h1 id=module-filter_json>Module <code>filter_json</code></h1><p>Fetch all objects related to another one, regardless of the depth.<p><strong>Parameters</strong><ul><li>[<code>str</code>]: Name of the object to filter for.<li>[<code>str</code>]: Path to the JSON file(s).</ul><p><strong>Returns</strong><ul><li>[<code>str</code>]: JSON-formatted, nested list of object and upstream dependencies (objects that are depended on).</ul><p><strong>Usage</strong><pre class=highlight><code class=language-shell>$ python script.py &lt;OBJECT NAME&gt; &lt;JSON FILE&gt; [&lt;JSON FILE&gt; [...]]</code></pre><p><strong>Example</strong><pre class=highlight><code class=language-shell>$ python script.py fact_thing dependencies.json
+$ python script.py dim_whatever file1.json file2.json file3.json</code></pre><p><strong>Functions</strong><ul><li><a href=#filter_jsonfilter_json><code>filter_json()</code></a>: Fetch all objects related to a single object, regardless of the depth.</ul><h2 id=functions_1>Functions</h2><h3 id=filter_jsonfilter_json><code>filter_json.filter_json</code></h3><pre class=highlight><code class=language-python>filter_json(
+    name: str,
+    objects: dict[str, list[str]],
+    _objects: dict[str, list[str]] | None = None,
+) -&gt; dict[str, list[str]]:</code></pre><p>Fetch all objects related to a single object, regardless of the depth.<p><strong>Parameters</strong><ul><li><code>name</code> [<code>str</code>]: Name of the object to filter for.<li><code>objects</code> [<code>dict[str, list[str]]</code>]: Dictionary of objects and upstream dependencies.<li><code>_objects</code> [<code>dict[str, list[str]]</code>]: Dictionary of objects already parsed.</ul><p><strong>Returns</strong><ul><li>[<code>dict[str, list[str]]</code>]: Filtered list of upstream and downstream dependencies.</ul><details><summary>source</summary><pre class=highlight><code class=language-python>def filter_json(
+    name: str,
+    objects: dict[str, list[str]],
+    _objects: dict[str, list[str]] | None = None,
+) -&gt; dict[str, list[str]]:
+    r"""Fetch all objects related to a single object, regardless of the depth.
+
+    Parameters
+    ----------
+    name : str
+        Name of the object to filter for.
+    objects : dict[str, list[str]]
+        Dictionary of objects and upstream dependencies.
+    _objects : dict[str, list[str]]
+        Dictionary of objects already parsed.
+
+    Returns
+    -------
+    : dict[str, list[str]]
+        Filtered list of upstream and downstream dependencies.
+
+    """
+    _objects = {} if _objects is None else _objects
+
+    included: list[str] = []
+
+    # filter until the size of the list does not change anymore
+    maxn = 1e99
+    while len(included) != maxn:
+        maxn = len(included)
+
+        # run through all the nodes
+        # expensive if a lot of objects are involved
+        for n, deps in objects.items():
+            if n == name or n in included:
+                for d in deps:
+                    if d not in included:
+                        included.append(d)
+
+    # all objects along the lineage
+    for i in included:
+        if i in objects and i not in _objects:
+            _objects[i] = objects[i]
+
+    return _objects</code></pre></details><h1 id=module-format_json>Module <code>format_json</code></h1><p>Convert a child -&gt; list of parents JSON to <code>Mermaid</code> syntax.<p><strong>Parameters</strong><ul><li>[<code>str</code>]: Path to the JSON file(s).</ul><p><strong>Returns</strong><ul><li>[<code>str</code>]: <code>Mermaid</code> diagram.</ul><p><strong>Usage</strong><pre class=highlight><code class=language-shell>$ python script.py &lt;JSON FILE&gt; [&lt;JSON FILE&gt; [...]]</code></pre><p><strong>Example</strong><pre class=highlight><code class=language-shell>$ python script.py dependencies.json
+$ python script.py file1.json file2.json file3.json</code></pre><p><strong>Functions</strong><ul><li><a href=#format_jsonto_dot><code>to_dot()</code></a>: Convert the JSON content to <code>DOT</code> syntax.<li><a href=#format_jsonto_mmd><code>to_mmd()</code></a>: Convert the JSON content to <code>Mermaid</code> syntax.</ul><h2 id=functions_2>Functions</h2><h3 id=format_jsonto_dot><code>format_json.to_dot</code></h3><pre class=highlight><code class=language-python>to_dot(objects: dict[str, list[str]]) -&gt; str:</code></pre><p>Convert the JSON content to <code>DOT</code> syntax.<p><strong>Parameters</strong><ul><li><code>objects</code> [<code>dict[str, list[str]]</code>]: Dictionary of objects and upstream dependencie.</ul><p><strong>Returns</strong><ul><li>[<code>str</code>]: <code>DOT</code> diagram.</ul><details><summary>source</summary><pre class=highlight><code class=language-python>def to_dot(objects: dict[str, list[str]]) -&gt; str:
+    r"""Convert the JSON content to `DOT` syntax.
+
+    Parameters
+    ----------
+    objects : dict[str, list[str]]
+        Dictionary of objects and upstream dependencie.
+
+    Returns
+    -------
+    : str
+        `DOT` diagram.
+
+    """
+    d = ""
+
+    # build the list of unique nodes
+    nodes: dict[str, int] = {}
+    i = 0
+    for n1, deps in objects.items():
+        if n1 not in nodes:
+            i += 1
+            nodes[n1] = i
+        for n2 in deps:
+            if n2 not in nodes:
+                i += 1
+                nodes[n2] = i
+
+    # nodes
+    d += "  // nodes\n"
+    for i, n in enumerate(nodes):
+        d += f'  node{i} [label"{n}"]\n'
+
+    # links
+    d += "  // links\n"
+    for n1 in objects:
+        for n2 in objects:
+            d += f"  node{nodes[n1]} -- node{nodes[n2]}\n"
+
+    d += "}"
+
+    return f"graph {{\n{d}\n}}"</code></pre></details><h3 id=format_jsonto_mmd><code>format_json.to_mmd</code></h3><pre class=highlight><code class=language-python>to_mmd(objects: dict[str, list[str]]) -&gt; str:</code></pre><p>Convert the JSON content to <code>Mermaid</code> syntax.<p><strong>Parameters</strong><ul><li><code>objects</code> [<code>dict[str, list[str]]</code>]: Dictionary of objects and upstream dependencie.</ul><p><strong>Returns</strong><ul><li>[<code>str</code>]: <code>Mermaid</code> diagram.</ul><details><summary>source</summary><pre class=highlight><code class=language-python>def to_mmd(objects: dict[str, list[str]]) -&gt; str:
+    r"""Convert the JSON content to `Mermaid` syntax.
+
+    Parameters
+    ----------
+    objects : dict[str, list[str]]
+        Dictionary of objects and upstream dependencie.
+
+    Returns
+    -------
+    : str
+        `Mermaid` diagram.
+
+    """
+    # always top-bottom, manually change it if you want
+    d = "graph TB\n"
+
+    # build the list of unique nodes
+    nodes: dict[str, int] = {}
+    i = 0
+    for n1, deps in objects.items():
+        if n1 not in nodes:
+            i += 1
+            nodes[n1] = i
+        for n2 in deps:
+            if n2 not in nodes:
+                i += 1
+                nodes[n2] = i
+
+    # nodes
+    d += "  %% nodes\n"
+    for i, n in enumerate(nodes):
+        d += f"  node{i}({n})\n"
+
+    # links
+    d += "  %% links\n"
+    for n1 in objects:
+        for n2 in objects:
+            d += f"  node{nodes[n1]} --- node{nodes[n2]}\n"
+
+    return d</code></pre></details><h1 id=module-sql_to_json>Module <code>sql_to_json</code></h1><p>Extract upstream dependencies from SQL files, each containing a single query.<p><strong>Parameters</strong><ul><li>[<code>str</code>]: Path to the SQL script(s), each containing a <em>singled out</em> SQL query.</ul><p><strong>Returns</strong><ul><li>[<code>str</code>]: JSON-formatted, nested list of objects and associated list of upstream dependencies. One can see this object as child -&gt; list of parents.</ul><p><strong>Usage</strong><pre class=highlight><code class=language-shell>$ python script.py &lt;SQL FILE&gt; [&lt;SQL FILE&gt; [...]]
+$ python script.py &lt;SQL FILE&gt; [&lt;SQL FILE&gt; [...]] --pretty</code></pre><p><strong>Example</strong><pre class=highlight><code class=language-shell>$ python script.py view.sql --pretty
+$ python script.py fact_*.sql dim_*.sql</code></pre><p><strong>Note</strong><ul><li>Only a few SQL statements amongst the gazillions ways to write them are supported; feel free to drop a message with a new one to test.<li>This is based on queries running on <code>Redshift</code>, no guarantees this would work on any other syntax (but <code>Redshift</code> is largely based on <code>PostgreSQL</code>, there's hope).<li>This little stunt is still in alpha, and a lot more testing is required!</ul><p><strong>Functions</strong><ul><li><a href=#sql_to_jsonclean_query><code>clean_query()</code></a>: Deep-cleaning of a SQL query via<li><a href=#sql_to_jsonclean_functions><code>clean_functions()</code></a>: Escape <code>FROM</code> operators in SQL functions.<li><a href=#sql_to_jsonsplit_query><code>split_query()</code></a>: Split a query in its subqueries, if any.<li><a href=#sql_to_jsonfetch_dependencies><code>fetch_dependencies()</code></a>: Fetch upstream dependencies from each subquery.</ul><h2 id=functions_3>Functions</h2><h3 id=sql_to_jsonclean_query><code>sql_to_json.clean_query</code></h3><pre class=highlight><code class=language-python>clean_query(query: str) -&gt; str:</code></pre><p>Deep-cleaning of a SQL query via <a href=https://github.com/andialbrecht/sqlparse><code>sqlparse</code></a> and regular expressions.<p><strong>Parameters</strong><ul><li><code>query</code> [<code>str</code>]: The SQL query.</ul><p><strong>Returns</strong><ul><li>[<code>str</code>]: Cleaned up query.</ul><p><strong>Notes</strong><ol><li><code>sqlparse</code> tries to set all supported SQL statements to uppercase.<li>Further cleaning is done via the following regular expressions:<ul><li><code>"/\*.*\*/"</code> -&gt; <code>""</code>: remove remaining multiline comments;<li><code>"--.*"</code> -&gt; <code>""</code>: remove remaining inline comments;<li><code>"([(,)])"</code> -&gt; <code>" , "</code>: single spaces around function parameters;<li><code>"([A-Za-z0-9_]+)\s*\.\s*([A-Za-z0-9_]+)"</code> -&gt; <code>"[...].[...]"</code>: remove spaces around object descriptors;<li><code>"(.*)\s*[&lt;=&gt;]+\s*(.*)"</code> -&gt; <code>"[...] = [...]"</code>: single spaces around equal, greater or less than signs (or combinations thereof);<li><code>"(.*)\s*\|\|\s*(.*)</code> -&gt; <code>"[...] || [...]"</code>: single spaces around concatenation operators;<li><code>"(.*)\s*::\s*(.*)"</code> -&gt; <code>"[...]::[...]"</code>: remove spaces around datatyping operators;<li><code>"[\s]+"</code> -&gt; <code>" "</code>: replace multiple spaces by single spaces;<li><code>";$"</code> -&gt; <code>""</code>: remove final semicolumn (<code>;</code>).</ul></ol><details><summary>source</summary><pre class=highlight><code class=language-python>def clean_query(query: str) -&gt; str:
+    r"""Deep-cleaning of a SQL query via
+    [`sqlparse`](https://github.com/andialbrecht/sqlparse) and regular expressions.
+
+    Parameters
+    ----------
+    query : str
+        The SQL query.
+
+    Returns
+    -------
+    : str
+        Cleaned up query.
+
+    Notes
+    -----
+    1. `sqlparse` tries to set all supported SQL statements to uppercase.
+    2. Further cleaning is done via the following regular expressions:
+        * `"/\*.*\*/"` -&gt; `""`: remove remaining multiline comments;
+        * `"--.*"` -&gt; `""`: remove remaining inline comments;
+        * `"([(,)])"` -&gt; `" , "`: single spaces around function parameters;
+        * `"([A-Za-z0-9_]+)\s*\.\s*([A-Za-z0-9_]+)"` -&gt; `"[...].[...]"`: remove spaces
+          around object descriptors;
+        * `"(.*)\s*[&lt;=&gt;]+\s*(.*)"` -&gt; `"[...] = [...]"`: single spaces around equal,
+          greater or less than signs (or combinations thereof);
+        * `"(.*)\s*\|\|\s*(.*)` -&gt; `"[...] || [...]"`: single spaces around
+          concatenation operators;
+        * `"(.*)\s*::\s*(.*)"` -&gt; `"[...]::[...]"`: remove spaces around datatyping
+          operators;
+        * `"[\s]+"` -&gt; `" "`: replace multiple spaces by single spaces;
+        * `";$"` -&gt; `""`: remove final semicolumn (`;`).
+
+    """
+    # good effort, but does not know some functions/keywords
+    q = sqlparse.format(query, keyword_case="lower", strip_comments=True)
+
+    # regular cleaning
+    q = re.sub(r"/\*.*\*/", "", q, flags=re.DOTALL)
+    q = re.sub("--.*", "", q)
+    q = re.sub("([(,)])", r" \1 ", q)
+    q = re.sub(r"([A-Za-z0-9_]+)\s*\.\s*([A-Za-z0-9_]+)", r"\1.\2", q)
+    q = re.sub(r"(.*)\s*[&lt;=&gt;]+\s*(.*)", r"\1 = \2", q)
+    q = re.sub(r"(.*)\s*\|\|\s*(.*)", r"\1 || \2", q)
+    q = re.sub(r"(.*)\s*::\s*(.*)", r"\1::\2", q)
+    q = re.sub(r"[\s]+", " ", q)
+    q = re.sub(";$", "", q)
+    q = q.strip()
+
+    return q</code></pre></details><h3 id=sql_to_jsonclean_functions><code>sql_to_json.clean_functions</code></h3><pre class=highlight><code class=language-python>clean_functions(query: str) -&gt; str:</code></pre><p>Escape <code>FROM</code> operators in SQL functions.<p><strong>Parameters</strong><ul><li><code>query</code> [<code>str</code>]: The SQL query.</ul><p><strong>Returns</strong><ul><li>[<code>str</code>]: Cleaned up query.</ul><p><strong>Notes</strong><p>Currently testing for the following regular expression:<ul><li><code>"(\(\s+['\"].+?['\"]\s+)FROM(\s+\S+?\s+\))"</code>: match function parameters including quoted keywords and the <code>FROM</code> keyword,<li><code>"(\(\s+\S+?\s+)FROM(\s+\S+?\s+\))"</code>: match function parameters including regular unquoted keywords and the <code>FROM</code> keyword,<li><code>"(\(\s+\S+?\s+)FROM(\s+\S+?\s+\()"</code>: ``.</ul><p>The <code>FROM</code> from the matched pattern will be replaced by <code>%FROM%</code> not to be matched by the follow up processing.<details><summary>source</summary><pre class=highlight><code class=language-python>def clean_functions(query: str) -&gt; str:
+    r"""Escape `FROM` operators in SQL functions.
+
+    Parameters
+    ----------
+    query : str
+        The SQL query.
+
+    Returns
+    -------
+    : str
+        Cleaned up query.
+
+    Notes
+    -----
+    Currently testing for the following regular expression:
+
+    * `"(\(\s+['\"].+?['\"]\s+)FROM(\s+\S+?\s+\))"`: match function parameters including
+      quoted keywords and the `FROM` keyword,
+    * `"(\(\s+\S+?\s+)FROM(\s+\S+?\s+\))"`: match function parameters including regular
+      unquoted keywords and the `FROM` keyword,
+    * `"(\(\s+\S+?\s+)FROM(\s+\S+?\s+\()"`: ``.
+
+    The `FROM` from the matched pattern will be replaced by `%FROM%` not to be matched
+    by the follow up processing.
+
+    """
+    # clean up the query until its length does not change anymore
+    maxn = 1e99
+    while len(query) != maxn:
+        maxn = len(query)
+
+        # test for various cases; kind of expect a query that went through the
+        # clean_query() function first as it does not account for multiline text
+        for r in (
+            r"(\(\s+['\"].+?['\"]\s+)from(\s+\S+?\s+\))",
+            r"(\(\s+\S+?\s+)from(\s+\S+?\s+\))",
+            r"(\(\s+\S+?\s+)from(\s+\S+?\s+\()",  # reversed bracket
+        ):
+            for m in re.finditer(r, query):
+                query = query.replace(m.group(0), f"{m.group(1)}%FROM%{m.group(2)}")
+
+    return query</code></pre></details><h3 id=sql_to_jsonsplit_query><code>sql_to_json.split_query</code></h3><pre class=highlight><code class=language-python>split_query(query: str) -&gt; dict[str, str]:</code></pre><p>Split a query in its subqueries, if any.<p><strong>Parameters</strong><ul><li><code>query</code> [<code>str</code>]: The DDL to parse.</ul><p><strong>Returns</strong><ul><li>[<code>dict[str, str]</code>]: Dictionary of [sub]queries and associated DDL, split in parts if the <code>union</code> keyword is found.</ul><p><strong>Notes</strong><p>Processing goes as follows:<ol><li>Search for <code>... as ( select ... )</code> CTE statement via the <code>[^\s]+\s+AS\s+\(\s+SELECT</code> regular expression.<li>Read each character from there, keeping count of opening/closing brackets; once this number reaches zero (or we seeked to end of the query) we are done with the subquery.<li>Store the subquery under the CTE name.<li>Recursively search for new CTE statements within the subquery, if any.<li>Move on to the next subquery.<li>Extract the main query, if any, using the following regular expressions (these could be factored a bit further but clarity prevails):<ul><li><code>CREATE\s+EXTERNAL\s+TABLE\s+([^\s]+)</code><li><code>CREATE\s+TABLE\s([^\s]+)</code><li><code>CREATE\s+MATERIALIZED\s+VIEW\s([^\s]+)</code><li><code>CREATE\+OR\s+REPLACE\s+VIEW\s([^\s]+)</code><li><code>CREATE\s+VIEW\s([^\s]+)</code></ul></ol><details><summary>source</summary><pre class=highlight><code class=language-python>def split_query(query: str) -&gt; dict[str, str]:
+    r"""Split a query in its subqueries, if any.
+
+    Parameters
+    ----------
+    query : str
+        The DDL to parse.
+
+    Returns
+    -------
+    : dict[str, str]
+        Dictionary of [sub]queries and associated DDL, split in parts if the `union`
+        keyword is found.
+
+    Notes
+    -----
+    Processing goes as follows:
+
+    1. Search for `... as ( select ... )` CTE statement via the
+       `[^\s]+\s+AS\s+\(\s+SELECT` regular expression.
+    2. Read each character from there, keeping count of opening/closing brackets; once
+       this number reaches zero (or we seeked to end of the query) we are done with the
+       subquery.
+    3. Store the subquery under the CTE name.
+    4. Recursively search for new CTE statements within the subquery, if any.
+    5. Move on to the next subquery.
+    6. Extract the main query, if any, using the following regular expressions (these
+       could be factored a bit further but clarity prevails):
+        * `CREATE\s+EXTERNAL\s+TABLE\s+([^\s]+)`
+        * `CREATE\s+TABLE\s([^\s]+)`
+        * `CREATE\s+MATERIALIZED\s+VIEW\s([^\s]+)`
+        * `CREATE\+OR\s+REPLACE\s+VIEW\s([^\s]+)`
+        * `CREATE\s+VIEW\s([^\s]+)`
+
+    """
+    # recursively extract subqueries
+    # make sure we start from empty parts
+    query, parts = _split(query, {})
+    maxn = len(parts)
+
+    # extract main query, if any (if the query does not generate any object, this step
+    # returns nothing)
+    for r in (
+        r"create\s+external\s+table\s+([^\s]+)",
+        r"create\s+table\s([^\s]+)",
+        r"create\s+materialized\s+view\s+([^\s]+)",
+        r"create\s+or\s+replace\s+view\s+([^\s]+)",
+        r"create\s+view\s+([^\s]+)",
+    ):
+        if (m := re.search(r, query, flags=re.IGNORECASE)) is not None:
+            parts[m.group(1)] = re.sub(
+                r"select\s+(.*?)\s+from", "select %COLUMNS% from", query
+            )
+            break
+
+    # if not object was found, we still want to analyze the last statement
+    if len(parts) == maxn:
+        parts["SELECT"] = re.sub(
+            r"select\s+(.*?)\s+from", "select %COLUMNS% from", query
+        )
+
+    # clean out unwanted objects (containing our "%SUBQUERY:" keyword for instance,
+    # product of using extra brackets and the imperfect regular expressions above)
+    for k in list(parts.keys()):
+        if "%SUBQUERY:" in k:
+            parts.pop(k)
+
+    return parts</code></pre></details><h3 id=sql_to_jsonfetch_dependencies><code>sql_to_json.fetch_dependencies</code></h3><pre class=highlight><code class=language-python>fetch_dependencies(parts: dict[str, str]) -&gt; dict[str, list[str]]:</code></pre><p>Fetch upstream dependencies from each subquery.<p><strong>Parameters</strong><ul><li><code>parts</code> [<code>dict[str, list[str]]</code>]: Dictionary of [sub]queries and associated DDL.</ul><p><strong>Returns</strong><ul><li>[<code>dict[str, list[str]]</code>]: Dictionary of objects and associated list of upstream dependencies.</ul><p><strong>Notes</strong><p>Supported regular expressions (<em>e.g.</em>, SQL statements):<ol><li><code>FROM\s+([^\s(]+)</code><li><code>JOIN\s+([^\s(]+)</code><li><code>LOCATION\s+'(s3://.+)'</code> (<code>Redshift</code> stuff)</ol><details><summary>source</summary><pre class=highlight><code class=language-python>def fetch_dependencies(parts: dict[str, str]) -&gt; dict[str, list[str]]:
+    r"""Fetch upstream dependencies from each subquery.
+
+    Parameters
+    ----------
+    parts : dict[str, list[str]]
+        Dictionary of [sub]queries and associated DDL.
+
+    Returns
+    -------
+    : dict[str, list[str]]
+        Dictionary of objects and associated list of upstream dependencies.
+
+    Notes
+    -----
+    Supported regular expressions (_e.g._, SQL statements):
+
+    1. `FROM\s+([^\s(]+)`
+    2. `JOIN\s+([^\s(]+)`
+    3. `LOCATION\s+'(s3://.+)'` (`Redshift` stuff)
+
+    """
+    tree: dict[str, list[str]] = {}
+
+    # iterate over each object -&gt; associated subqueries
+    for n, p in parts.items():
+        if any(f" {k} " in p.lower() for k in ("from", "join", "location")):
+            for r in (
+                r"\s+from\s+([^\s(]+)",
+                r"\s+join\s+([^\s(]+)",
+                r"\s+location\s+'(s3://.+)'",
+            ):
+                for m in re.finditer(r, p, flags=re.IGNORECASE):
+                    if n in tree:
+                        if m.group(1) not in tree[n]:
+                            tree[n].append(m.group(1))
+                    else:
+                        tree[n] = [m.group(1)]
+        else:
+            tree[n] = []
+
+        # order the dependencies
+        tree[n].sort()
+
+    return tree</code></pre></details><h1 id=module-test_sql_to_json>Module <code>test_sql_to_json</code></h1><p>Some test regarding our little SQL parsing.<p><strong>Functions</strong><ul><li><a href=#test_sql_to_jsontest_convoluted_query><code>test_convoluted_query()</code></a>: Test a convoluted query, including subqueries and subsubqueries.<li><a href=#test_sql_to_jsontest_create_external_table><code>test_create_external_table()</code></a>: Test for the <code>CREATE EXTERNAL TABLE</code> and <code>LOCATION</code> statements.<li><a href=#test_sql_to_jsontest_create_materialized_view><code>test_create_materialized_view()</code></a>: Test for <code>CREATE MATERIALIZED VIEW</code> statement.<li><a href=#test_sql_to_jsontest_create_table><code>test_create_table()</code></a>: Test for <code>CREATE TABLE</code> statement.<li><a href=#test_sql_to_jsontest_create_view><code>test_create_view()</code></a>: Test for <code>CREATE [OR REPLACE] VIEW</code> statements.<li><a href=#test_sql_to_jsontest_false_positive_from><code>test_false_positive_from()</code></a>: Test the exclusion of <code>..._from</code> names or <code>FUNCTION(... FROM ...)</code> statements.<li><a href=#test_sql_to_jsontest_subqueries><code>test_subqueries()</code></a>: Test for subqueries (CTE), <em>e.g.</em>, statement including a <code>WITH</code> clause.</ul><h2 id=functions_4>Functions</h2><h3 id=test_sql_to_jsontest_convoluted_query><code>test_sql_to_json.test_convoluted_query</code></h3><pre class=highlight><code class=language-python>test_convoluted_query() -&gt; None:</code></pre><p>Test a convoluted query, including subqueries and subsubqueries.<p>The following query contains:<ul><li>subqueries defined through <code>WITH</code>,<li>subqueries within subqueries (...),<li>subqueries without <code>FROM</code> or <code>JOIN</code>,<li>a function including the <code>FROM</code> keyword,<li><code>FROM</code>, <code>JOIN</code>, <code>UNION</code>.</ul><pre class=highlight><code class=language-sql>with
+  subquery1 as (
+    select
+      attr1,
+      attr2
+    from (
+      with
+        subsubquery1 as (
+          select
+            t1.attr1,
+            t2.attr2
+          from table1 t1
+          inner join table2 t2
+          on t1.attr = t2.attr
+        ),
+        subsubquery2 as (
+          select
+            attr1,
+            attr2
+          from table3
+        )
+      select * from subsubquery1
+      union all
+      select * from subsubquery2
+    )
+    where attr1 &lt;&gt; 0
+      and attr2 is not null
+  ),
+  subquery2 (
+    select
+      s1.*,
+      t4.*
+    from table4 t4
+    left outer join subquery1 s1
+    on t4.attr1 = s1.attr1 and t4.attr2 &gt; 0
+    inner join table5 t5
+    on t4.attr1 = t5.attr1
+    where t5.valid_from is not null
+  ),
+  subquery3 as (
+    select
+      trim('"' from attr1) as attr1,
+      '2' as attr2
+  )
+select
+  s2.attr1,
+  s2.attr2
+from subquery2 s2
+cross join subquery3 s3;</code></pre><p>Below the query diagram:</p>
+<!-- prettier-ignore -->
+<div class="mermaid">graph LR
+  %% nodes
+  node1(table1)
+  node2(subsubquery1)
+  node3(table2)
+  node4(table3)
+  node5(subsubquery2)
+  node6(subquery1)
+  node7(subquery2)
+  node8(table4)
+  node9(table5)
+  node10(SELECT)
+  node11(subquery3)
+  %% links
+  node1 --- node2
+  node3 --- node2
+  node4 --- node5
+  node2 --- node6
+  node5 --- node6
+  node6 --- node7
+  node8 --- node7
+  node9 --- node7
+  node7 --- node10
+  node11 --- node10
+  %% style
+  linkStyle default fill:none,stroke-width:1px</div>
+<p>Note the final <code>SELECT</code> statement is indicated as a node in itself, despite not being an object.<details><summary>source</summary><pre class=highlight><code class=language-python>def test_convoluted_query() -&gt; None:
+    """Test a convoluted query, including subqueries and subsubqueries.
+
+    The following query contains:
+
+    * subqueries defined through `WITH`,
+    * subqueries within subqueries (...),
+    * subqueries without `FROM` or `JOIN`,
+    * a function including the `FROM` keyword,
+    * `FROM`, `JOIN`, `UNION`.
+
+    ```sql
+    with
+      subquery1 as (
+        select
+          attr1,
+          attr2
+        from (
+          with
+            subsubquery1 as (
+              select
+                t1.attr1,
+                t2.attr2
+              from table1 t1
+              inner join table2 t2
+              on t1.attr = t2.attr
+            ),
+            subsubquery2 as (
+              select
+                attr1,
+                attr2
+              from table3
+            )
+          select * from subsubquery1
+          union all
+          select * from subsubquery2
+        )
+        where attr1 &lt;&gt; 0
+          and attr2 is not null
+      ),
+      subquery2 (
+        select
+          s1.*,
+          t4.*
+        from table4 t4
+        left outer join subquery1 s1
+        on t4.attr1 = s1.attr1 and t4.attr2 &gt; 0
+        inner join table5 t5
+        on t4.attr1 = t5.attr1
+        where t5.valid_from is not null
+      ),
+      subquery3 as (
+        select
+          trim('"' from attr1) as attr1,
+          '2' as attr2
+      )
+    select
+      s2.attr1,
+      s2.attr2
+    from subquery2 s2
+    cross join subquery3 s3;
+    ```
+
+    Below the query diagram:
+
+    ```mermaid
+    graph LR
+      %% nodes
+      node1(table1)
+      node2(subsubquery1)
+      node3(table2)
+      node4(table3)
+      node5(subsubquery2)
+      node6(subquery1)
+      node7(subquery2)
+      node8(table4)
+      node9(table5)
+      node10(SELECT)
+      node11(subquery3)
+      %% links
+      node1 --- node2
+      node3 --- node2
+      node4 --- node5
+      node2 --- node6
+      node5 --- node6
+      node6 --- node7
+      node8 --- node7
+      node9 --- node7
+      node7 --- node10
+      node11 --- node10
+      %% style
+      linkStyle default fill:none,stroke-width:1px
+    ```
+
+    Note the final `SELECT` statement is indicated as a node in itself, despite not
+    being an object.
+    """
+    rq = """
+    with
+      subquery1 as (
+        select
+          attr1,
+          attr2
+        from (
+          with
+            subsubquery1 as (
+              select
+                t1.attr1,
+                t2.attr2
+              from table1 t1
+              inner join table2 t2
+              on t1.attr = t2.attr
+            ),
+            subsubquery2 as (
+              select
+                attr1,
+                attr2
+              from table3
+            )
+          select * from subsubquery1
+          union all
+          select * from subsubquery2
+        )
+        where attr1 &lt;&gt; 0
+          and attr2 is not null
+      ),
+      subquery2 as (
+        select
+          s1.*,
+          t4.*
+        from table4 t4
+        left outer join subquery1 s1
+        on t4.attr1 = s1.attr1
+        inner join table5 t5
+        on t4.attr1 = t5.attr1
+        where t5.valid_from is not null
+      ),
+      subquery3 as (
+        select
+          trim('"' from attr1) as attr1,
+          '2' as attr2
+      )
+    select
+      s2.attr1,
+      s2.attr2
+    from subquery2 s2
+    cross join subquery3 s3;
+    """
+
+    q, s, d = _process(rq)
+
+    assert d == {
+        "subsubquery1": ["table1", "table2"],
+        "subsubquery2": ["table3"],
+        "subquery1": ["subsubquery1", "subsubquery2"],
+        "subquery2": ["subquery1", "table4", "table5"],
+        "subquery3": [],
+        "SELECT": ["subquery2", "subquery3"],
+    }</code></pre></details><h3 id=test_sql_to_jsontest_create_external_table><code>test_sql_to_json.test_create_external_table</code></h3><pre class=highlight><code class=language-python>test_create_external_table() -&gt; None:</code></pre><p>Test for the <code>CREATE EXTERNAL TABLE</code> and <code>LOCATION</code> statements.<pre class=highlight><code class=language-sql>create external table external_table (
+  attr1 timestamp,
+  attr2 varchar(32),
+  attr3 smallint
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
+OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION 's3://bucket/key/_symlink_format_manifest';</code></pre><details><summary>source</summary><pre class=highlight><code class=language-python>def test_create_external_table() -&gt; None:
+    """Test for the `CREATE EXTERNAL TABLE` and `LOCATION` statements.
+
+    ```sql
+    create external table external_table (
+      attr1 timestamp,
+      attr2 varchar(32),
+      attr3 smallint
+    )
+    ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+    STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
+    OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+    LOCATION 's3://bucket/key/_symlink_format_manifest';
+    ```
+    """
+    rq = """
+    CREATE EXTERNAL TABLE external_table (
+      attr1 timestamp,
+      attr2 varchar(32),
+      attr3 smallint
+    )
+    ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+    STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
+    OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+    LOCATION 's3://bucket/key/_symlink_format_manifest';
+    """
+
+    q, s, d = _process(rq)
+
+    assert d == {"external_table": ["s3://bucket/key/_symlink_format_manifest"]}</code></pre></details><h3 id=test_sql_to_jsontest_create_materialized_view><code>test_sql_to_json.test_create_materialized_view</code></h3><pre class=highlight><code class=language-python>test_create_materialized_view() -&gt; None:</code></pre><p>Test for <code>CREATE MATERIALIZED VIEW</code> statement.<pre class=highlight><code class=language-sql>create materialized view materialized_view as (select * from external_table)</code></pre><pre class=highlight><code class=language-sql>create materialized view materialized_view
+backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
+select * from external_table;</code></pre><details><summary>source</summary><pre class=highlight><code class=language-python>def test_create_materialized_view() -&gt; None:
+    """Test for `CREATE MATERIALIZED VIEW` statement.
+
+    ```sql
+    create materialized view materialized_view as (select * from external_table)
+    ```
+
+    ```sql
+    create materialized view materialized_view
+    backup no diststyle key distkey (attr) sortkey (attr1, attr2) as
+    select * from external_table;
+    ```
+    """
+    for rq in (
+        "create materialized view materialized_view as (select * from external_table)",
+        (
+            "create materialized view materialized_view "
+            "backup no diststyle key distkey (attr) sortkey (attr1, attr2) as "
+            "select * from external_table;"
+        ),
+    ):
+        q, s, d = _process(rq)
+
+        assert d == {"materialized_view": ["external_table"]}</code></pre></details><h3 id=test_sql_to_jsontest_create_table><code>test_sql_to_json.test_create_table</code></h3><pre class=highlight><code class=language-python>test_create_table() -&gt; None:</code></pre><p>Test for <code>CREATE TABLE</code> statement.<pre class=highlight><code class=language-sql>create table table2 as select * from table1</code></pre><details><summary>source</summary><pre class=highlight><code class=language-python>def test_create_table() -&gt; None:
+    """Test for `CREATE TABLE` statement.
+
+    ```sql
+    create table table2 as select * from table1
+    ```
+    """
+    q, s, d = _process("create table table2 as select * from table1")
+
+    assert s == {"table2": "create table table2 as select %COLUMNS% from table1"}
+    assert d == {"table2": ["table1"]}</code></pre></details><h3 id=test_sql_to_jsontest_create_view><code>test_sql_to_json.test_create_view</code></h3><pre class=highlight><code class=language-python>test_create_view() -&gt; None:</code></pre><p>Test for <code>CREATE [OR REPLACE] VIEW</code> statements.<pre class=highlight><code class=language-sql>create or replace view simple_view as select * from static_table</code></pre><pre class=highlight><code class=language-sql>create view simple_view as select * from static_table</code></pre><details><summary>source</summary><pre class=highlight><code class=language-python>def test_create_view() -&gt; None:
+    """Test for `CREATE [OR REPLACE] VIEW` statements.
+
+    ```sql
+    create or replace view simple_view as select * from static_table
+    ```
+
+    ```sql
+    create view simple_view as select * from static_table
+    ```
+    """
+    for rq in (
+        "create or replace view simple_view as select * from static_table",
+        "create view simple_view as select * from static_table",
+    ):
+        q, s, d = _process(rq)
+
+        assert d == {"simple_view": ["static_table"]}</code></pre></details><h3 id=test_sql_to_jsontest_false_positive_from><code>test_sql_to_json.test_false_positive_from</code></h3><pre class=highlight><code class=language-python>test_false_positive_from() -&gt; None:</code></pre><p>Test the exclusion of <code>..._from</code> names or <code>FUNCTION(... FROM ...)</code> statements.<pre class=highlight><code class=language-sql>select * from table t
+right join valid_from vf
+on t.attr = vf.attr and extract(month from vf.datetime) &gt; 6</code></pre><pre class=highlight><code class=language-sql>select
+  extract(year from datetime),
+  extract(month from to_timestamp(trim('"' from string), 'YYYY-MM-DD HH:MI:SS.FF'))
+from table</code></pre><details><summary>source</summary><pre class=highlight><code class=language-python>def test_false_positive_from() -&gt; None:
+    """Test the exclusion of `..._from` names or `FUNCTION(... FROM ...)` statements.
+
+    ```sql
+    select * from table t
+    right join valid_from vf
+    on t.attr = vf.attr and extract(month from vf.datetime) &gt; 6
+    ```
+
+    ```sql
+    select
+      extract(year from datetime),
+      extract(month from to_timestamp(trim('"' from string), 'YYYY-MM-DD HH:MI:SS.FF'))
+    from table
+    ```
+    """
+    # first
+    rq = """
+    select * from table t
+    right join valid_from vf
+    on t.attr = vf.attr and extract(month from vf.datetime) &gt; 6
+    """
+
+    q, s, d = _process(rq)
+
+    assert d == {"SELECT": ["table", "valid_from"]}
+
+    # second
+    q = """
+    select
+      extract(year from datetime),
+      extract(month from to_timestamp(trim('"' from string), 'YYYY-MM-DD HH:MI:SS.FF'))
+    from table
+    """
+
+    q, s, d = _process(q)
+
+    assert s == {"SELECT": "select %COLUMNS% from table"}
+    assert d == {"SELECT": ["table"]}</code></pre></details><h3 id=test_sql_to_jsontest_subqueries><code>test_sql_to_json.test_subqueries</code></h3><pre class=highlight><code class=language-python>test_subqueries() -&gt; None:</code></pre><p>Test for subqueries (CTE), <em>e.g.</em>, statement including a <code>WITH</code> clause.<pre class=highlight><code class=language-sql>with
+  subquery1 as (
+    select
+      t1.attr1,
+      t2.attr2
+    from table1 t1
+    inner join table2 t2
+    on t1.attr = t2.attr
+  ),
+  subquery2 as (
+    select
+      attr1,
+      attr2
+    from table3
+  )
+select * from subquery1 s1
+left join (select * from subquery2) s2
+on s1.attr1 = s2.attr1</code></pre><pre class=highlight><code class=language-sql>with
+  subquery1 as (
+    select extract(day from attr) as day
+    from table1
+  ),
+  subquery2 as (
+    select attr
+    from table2 t2
+    left join table3
+    on t2.attr = t3.attr
+  ),
+  subquery3 as (
+    select attr
+    from table4
+  )
+select distinct
+  s1.attr,
+  s2.attr,
+  s3.attr
+from subquery1 s1
+inner join subquery2 s2
+on s1.attr = s2.attr
+right join subquery3 s3
+on s2.attr = s3.attr</code></pre><details><summary>source</summary><pre class=highlight><code class=language-python>def test_subqueries() -&gt; None:
+    """Test for subqueries (CTE), _e.g._, statement including a `WITH` clause.
+
+    ```sql
+    with
+      subquery1 as (
+        select
+          t1.attr1,
+          t2.attr2
+        from table1 t1
+        inner join table2 t2
+        on t1.attr = t2.attr
+      ),
+      subquery2 as (
+        select
+          attr1,
+          attr2
+        from table3
+      )
+    select * from subquery1 s1
+    left join (select * from subquery2) s2
+    on s1.attr1 = s2.attr1
+    ```
+
+    ```sql
+    with
+      subquery1 as (
+        select extract(day from attr) as day
+        from table1
+      ),
+      subquery2 as (
+        select attr
+        from table2 t2
+        left join table3
+        on t2.attr = t3.attr
+      ),
+      subquery3 as (
+        select attr
+        from table4
+      )
+    select distinct
+      s1.attr,
+      s2.attr,
+      s3.attr
+    from subquery1 s1
+    inner join subquery2 s2
+    on s1.attr = s2.attr
+    right join subquery3 s3
+    on s2.attr = s3.attr
+    ```
+    """
+    # 1
+    q = """
+    with
+      subquery1 as (
+        select
+          t1.attr1,
+          t2.attr2
+        from table1 t1
+        inner join table2 t2
+        on t1.attr = t2.attr
+      ),
+      subquery2 as (
+        select
+          attr1,
+          attr2
+        from table3
+      )
+    select * from subquery1 s1
+    left join (select * from subquery2) s2
+    on s1.attr1 = s2.attr1
+    """
+
+    q, s, d = _process(q)
+
+    assert d == {
+        "subquery1": ["table1", "table2"],
+        "subquery2": ["table3"],
+        "SELECT": ["subquery1", "subquery2"],
+    }
+
+    # 2
+    q = """
+    with
+      subquery1 as (
+        select extract(day from attr) as day
+        from table1
+      ),
+      subquery2 as (
+        select attr
+        from table2 t2
+        left join table3
+        on t2.attr = t3.attr
+      ),
+      subquery3 as (
+        select attr
+        from table4
+      )
+    select distinct
+      s1.attr,
+      s2.attr,
+      s3.attr
+    from subquery1 s1
+    inner join subquery2 s2
+    on s1.attr = s2.attr
+    right join subquery3 s3
+    on s2.attr = s3.attr
+    """
+
+    q, s, d = _process(q)
+
+    assert d == {
+        "subquery1": ["table1"],
+        "subquery2": ["table2", "table3"],
+        "subquery3": ["table4"],
+        "SELECT": ["subquery1", "subquery2", "subquery3"],
+    }</code></pre></details></div><span class=spacer></span><footer><a id=prev></a> <span class=spacer></span> <a id=next></a></footer></article></main>
