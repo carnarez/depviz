@@ -33,7 +33,7 @@ $ python script.py file1.csv file2.csv file3.csv
 ### `csv_to_json.to_json`
 
 ```python
-to_json(content: str, objects: dict[str, list[str]]) -> tuple[str, list[str]]:
+to_json(content: str, objects: dict[str, list[str]]) -> dict[str, list[str]]:
 ```
 
 Convert the CSV content to JSON.
@@ -92,7 +92,7 @@ $ python script.py dim_whatever file1.json file2.json file3.json
 filter_json(
     name: str,
     objects: dict[str, list[str]],
-    _objects: dict[str, list[str]] = {},
+    _objects: dict[str, list[str]] | None = None,
 ) -> dict[str, list[str]]:
 ```
 
@@ -285,7 +285,7 @@ the follow up processing.
 ### `sql_to_json.split_query`
 
 ```python
-split_query(query: str) -> dict[str, list[str]]:
+split_query(query: str) -> dict[str, str]:
 ```
 
 Split a query in its subqueries, if any.
@@ -296,8 +296,8 @@ Split a query in its subqueries, if any.
 
 **Returns**
 
-- \[`dict[str, list[str]]`\]: Dictionary of \[sub\]queries and associated DDL, split in
-  parts if the `union` keyword is found.
+- \[`dict[str, str]`\]: Dictionary of \[sub\]queries and associated DDL, split in parts
+  if the `union` keyword is found.
 
 **Notes**
 
@@ -321,14 +321,14 @@ Processing goes as follows:
 ### `sql_to_json.fetch_dependencies`
 
 ```python
-fetch_dependencies(parts: dict[str, list[str]]) -> dict[str, list[str]]:
+fetch_dependencies(parts: dict[str, str]) -> dict[str, list[str]]:
 ```
 
 Fetch upstream dependencies from each subquery.
 
 **Parameters**
 
-- \[`dict[str, list[str]]`\]: Dictionary of \[sub\]queries and associated DDL.
+- `parts` \[`dict[str, list[str]]`\]: Dictionary of \[sub\]queries and associated DDL.
 
 **Returns**
 
@@ -369,7 +369,7 @@ Some test regarding our little SQL parsing.
 ### `test_sql_to_json.test_convoluted_query`
 
 ```python
-test_convoluted_query():
+test_convoluted_query() -> None:
 ```
 
 Test a convoluted query, including subqueries and subsubqueries.
@@ -471,7 +471,7 @@ object.
 ### `test_sql_to_json.test_create_external_table`
 
 ```python
-test_create_external_table():
+test_create_external_table() -> None:
 ```
 
 Test for the `CREATE EXTERNAL TABLE` and `LOCATION` statements.
@@ -491,7 +491,7 @@ LOCATION 's3://bucket/key/_symlink_format_manifest';
 ### `test_sql_to_json.test_create_materialized_view`
 
 ```python
-test_create_materialized_view():
+test_create_materialized_view() -> None:
 ```
 
 Test for `CREATE MATERIALIZED VIEW` statement.
@@ -509,7 +509,7 @@ select * from external_table;
 ### `test_sql_to_json.test_create_table`
 
 ```python
-test_create_table():
+test_create_table() -> None:
 ```
 
 Test for `CREATE TABLE` statement.
@@ -521,7 +521,7 @@ create table table2 as select * from table1
 ### `test_sql_to_json.test_create_view`
 
 ```python
-test_create_view():
+test_create_view() -> None:
 ```
 
 Test for `CREATE [OR REPLACE] VIEW` statements.
@@ -537,7 +537,7 @@ create view simple_view as select * from static_table
 ### `test_sql_to_json.test_false_positive_from`
 
 ```python
-test_false_positive_from():
+test_false_positive_from() -> None:
 ```
 
 Test the exclusion of `..._from` names or `FUNCTION(... FROM ...)` statements.
@@ -558,7 +558,7 @@ from table
 ### `test_sql_to_json.test_subqueries`
 
 ```python
-test_subqueries():
+test_subqueries() -> None:
 ```
 
 Test for subqueries (CTE), _e.g._, statement including a `WITH` clause.
@@ -582,4 +582,31 @@ with
 select * from subquery1 s1
 left join (select * from subquery2) s2
 on s1.attr1 = s2.attr1
+```
+
+```sql
+with
+  subquery1 as (
+    select extract(day from attr) as day
+    from table1
+  ),
+  subquery2 as (
+    select attr
+    from table2 t2
+    left join table3
+    on t2.attr = t3.attr
+  ),
+  subquery3 as (
+    select attr
+    from table4
+  )
+select distinct
+  s1.attr,
+  s2.attr,
+  s3.attr
+from subquery1 s1
+inner join subquery2 s2
+on s1.attr = s2.attr
+right join subquery3 s3
+on s2.attr = s3.attr
 ```

@@ -3,8 +3,8 @@
 from sql_to_json import clean_functions, clean_query, fetch_dependencies, split_query
 
 
-def _process(query: str) -> dict[str, list[str]]:
-    """Wrapper function to process a query.
+def _process(query: str) -> tuple[str, dict[str, str], dict[str, list[str]]]:
+    """Process a query (wrapper function).
 
     Parameters
     ----------
@@ -13,8 +13,14 @@ def _process(query: str) -> dict[str, list[str]]:
 
     Returns
     -------
+    : str
+        Cleaned up query.
+    : dict[str, str]
+        Dictionary of [sub]queries and associated DDL, split in parts if the `union`
+        keyword is found.
     : dict[str, list[str]]
-        Output of a processed query, to be asserted in the tests.
+        Dictionary of objects and associated list of upstream dependencies.
+
     """
     q = clean_query(query)
     q = clean_functions(q)
@@ -24,7 +30,7 @@ def _process(query: str) -> dict[str, list[str]]:
     return q, s, d
 
 
-def test_convoluted_query():
+def test_convoluted_query() -> None:
     """Test a convoluted query, including subqueries and subsubqueries.
 
     The following query contains:
@@ -121,7 +127,7 @@ def test_convoluted_query():
     Note the final `SELECT` statement is indicated as a node in itself, despite not
     being an object.
     """
-    q = """
+    rq = """
     with
       subquery1 as (
         select
@@ -173,7 +179,7 @@ def test_convoluted_query():
     cross join subquery3 s3;
     """
 
-    q, s, d = _process(q)
+    q, s, d = _process(rq)
 
     assert d == {
         "subsubquery1": ["table1", "table2"],
@@ -185,7 +191,7 @@ def test_convoluted_query():
     }
 
 
-def test_create_external_table():
+def test_create_external_table() -> None:
     """Test for the `CREATE EXTERNAL TABLE` and `LOCATION` statements.
 
     ```sql
@@ -200,7 +206,7 @@ def test_create_external_table():
     LOCATION 's3://bucket/key/_symlink_format_manifest';
     ```
     """
-    q = """
+    rq = """
     CREATE EXTERNAL TABLE external_table (
       attr1 timestamp,
       attr2 varchar(32),
@@ -212,12 +218,12 @@ def test_create_external_table():
     LOCATION 's3://bucket/key/_symlink_format_manifest';
     """
 
-    q, s, d = _process(q)
+    q, s, d = _process(rq)
 
     assert d == {"external_table": ["s3://bucket/key/_symlink_format_manifest"]}
 
 
-def test_create_materialized_view():
+def test_create_materialized_view() -> None:
     """Test for `CREATE MATERIALIZED VIEW` statement.
 
     ```sql
@@ -230,23 +236,20 @@ def test_create_materialized_view():
     select * from external_table;
     ```
     """
-    for q in (
+    for rq in (
         "create materialized view materialized_view as (select * from external_table)",
-        " ".join(
-            (
-                "create materialized view materialized_view",
-                "backup no diststyle key distkey (attr) sortkey (attr1, attr2) as",
-                "select * from external_table;",
-            )
+        (
+            "create materialized view materialized_view "
+            "backup no diststyle key distkey (attr) sortkey (attr1, attr2) as "
+            "select * from external_table;"
         ),
     ):
-
-        q, s, d = _process(q)
+        q, s, d = _process(rq)
 
         assert d == {"materialized_view": ["external_table"]}
 
 
-def test_create_table():
+def test_create_table() -> None:
     """Test for `CREATE TABLE` statement.
 
     ```sql
@@ -259,7 +262,7 @@ def test_create_table():
     assert d == {"table2": ["table1"]}
 
 
-def test_create_view():
+def test_create_view() -> None:
     """Test for `CREATE [OR REPLACE] VIEW` statements.
 
     ```sql
@@ -270,16 +273,16 @@ def test_create_view():
     create view simple_view as select * from static_table
     ```
     """
-    for q in (
+    for rq in (
         "create or replace view simple_view as select * from static_table",
         "create view simple_view as select * from static_table",
     ):
-        q, s, d = _process(q)
+        q, s, d = _process(rq)
 
         assert d == {"simple_view": ["static_table"]}
 
 
-def test_false_positive_from():
+def test_false_positive_from() -> None:
     """Test the exclusion of `..._from` names or `FUNCTION(... FROM ...)` statements.
 
     ```sql
@@ -296,13 +299,13 @@ def test_false_positive_from():
     ```
     """
     # first
-    q = """
+    rq = """
     select * from table t
     right join valid_from vf
     on t.attr = vf.attr and extract(month from vf.datetime) > 6
     """
 
-    q, s, d = _process(q)
+    q, s, d = _process(rq)
 
     assert d == {"SELECT": ["table", "valid_from"]}
 
@@ -320,7 +323,7 @@ def test_false_positive_from():
     assert d == {"SELECT": ["table"]}
 
 
-def test_subqueries():
+def test_subqueries() -> None:
     """Test for subqueries (CTE), _e.g._, statement including a `WITH` clause.
 
     ```sql

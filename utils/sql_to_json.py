@@ -32,9 +32,11 @@ Note
 * This is based on queries running on `Redshift`, no guarantees this would work on any
   other syntax (but `Redshift` is largely based on `PostgreSQL`, there's hope).
 * This little stunt is still in alpha, and a lot more testing is required!
+
 """
 
 import json
+import pathlib
 import re
 import sys
 
@@ -72,6 +74,7 @@ def clean_query(query: str) -> str:
           operators;
         * `"[\s]+"` -> `" "`: replace multiple spaces by single spaces;
         * `";$"` -> `""`: remove final semicolumn (`;`).
+
     """
     # good effort, but does not know some functions/keywords
     q = sqlparse.format(query, keyword_case="lower", strip_comments=True)
@@ -116,11 +119,12 @@ def clean_functions(query: str) -> str:
 
     The `FROM` from the matched pattern will be replaced by `%FROM%` not to be matched
     by the follow up processing.
+
     """
     # clean up the query until its length does not change anymore
-    N = len(query) + 1
-    while N != len(query):
-        N = len(query)
+    maxn = 1e99
+    while len(query) != maxn:
+        maxn = len(query)
 
         # test for various cases; kind of expect a query that went through the
         # clean_query() function first as it does not account for multiline text
@@ -136,8 +140,8 @@ def clean_functions(query: str) -> str:
 
 
 def _split(
-    query: str, parts: dict[str, list[str]] = {}
-) -> tuple[str, dict[str, list[str]]]:
+    query: str, parts: dict[str, str] | None = None
+) -> tuple[str, dict[str, str]]:
     r"""Extract and parse subqueries from a query (or subquery).
 
     Parameters
@@ -159,14 +163,17 @@ def _split(
     ----
     A subquery is identified as a CTE, _i.e._, `... as ( select ... )`. The following
     regular expression is used: `[^\s]+\s+AS\s+\(\s+SELECT`.
+
     """
+    parts = {} if parts is None else parts
+
     # regular expression to catch subquery
     r = r"([^\s]+)(\s+as\s+)(\(\s+select)"
 
     # extract subqueries until the length of the string does not change anymore
-    N = len(query) + 1
-    while N != len(query):
-        N = len(query)
+    maxn = 1e99
+    while len(query) != maxn:
+        maxn = len(query)
 
         # find a match
         if (m := re.search(r, query)) is not None:
@@ -178,7 +185,6 @@ def _split(
 
             read = True  # store the characters until false
             while read:
-
                 # fetch the next character
                 try:
                     c = query[i]
@@ -196,7 +202,8 @@ def _split(
                 i += 1
 
                 # stop reading when the counts reach 0
-                read = False if not b or c is None else True
+                if not b or c is None:
+                    read = not read
 
             # remove the part(s) from the query and iterate
             query = query.replace(f"{n}{a}{s}", f"%SUBQUERY:{n}%", 1)
@@ -215,7 +222,7 @@ def _split(
     return query, parts
 
 
-def split_query(query: str) -> dict[str, list[str]]:
+def split_query(query: str) -> dict[str, str]:
     r"""Split a query in its subqueries, if any.
 
     Parameters
@@ -225,7 +232,7 @@ def split_query(query: str) -> dict[str, list[str]]:
 
     Returns
     -------
-    : dict[str, list[str]]
+    : dict[str, str]
         Dictionary of [sub]queries and associated DDL, split in parts if the `union`
         keyword is found.
 
@@ -248,11 +255,12 @@ def split_query(query: str) -> dict[str, list[str]]:
         * `CREATE\s+MATERIALIZED\s+VIEW\s([^\s]+)`
         * `CREATE\+OR\s+REPLACE\s+VIEW\s([^\s]+)`
         * `CREATE\s+VIEW\s([^\s]+)`
+
     """
     # recursively extract subqueries
     # make sure we start from empty parts
     query, parts = _split(query, {})
-    N = len(parts)
+    maxn = len(parts)
 
     # extract main query, if any (if the query does not generate any object, this step
     # returns nothing)
@@ -270,7 +278,7 @@ def split_query(query: str) -> dict[str, list[str]]:
             break
 
     # if not object was found, we still want to analyze the last statement
-    if len(parts) == N:
+    if len(parts) == maxn:
         parts["SELECT"] = re.sub(
             r"select\s+(.*?)\s+from", "select %COLUMNS% from", query
         )
@@ -284,12 +292,12 @@ def split_query(query: str) -> dict[str, list[str]]:
     return parts
 
 
-def fetch_dependencies(parts: dict[str, list[str]]) -> dict[str, list[str]]:
+def fetch_dependencies(parts: dict[str, str]) -> dict[str, list[str]]:
     r"""Fetch upstream dependencies from each subquery.
 
     Parameters
     ----------
-    : dict[str, list[str]]
+    parts : dict[str, list[str]]
         Dictionary of [sub]queries and associated DDL.
 
     Returns
@@ -304,12 +312,13 @@ def fetch_dependencies(parts: dict[str, list[str]]) -> dict[str, list[str]]:
     1. `FROM\s+([^\s(]+)`
     2. `JOIN\s+([^\s(]+)`
     3. `LOCATION\s+'(s3://.+)'` (`Redshift` stuff)
+
     """
     tree: dict[str, list[str]] = {}
 
     # iterate over each object -> associated subqueries
     for n, p in parts.items():
-        if any([f" {k} " in p.lower() for k in ("from", "join", "location")]):
+        if any(f" {k} " in p.lower() for k in ("from", "join", "location")):
             for r in (
                 r"\s+from\s+([^\s(]+)",
                 r"\s+join\s+([^\s(]+)",
@@ -338,16 +347,16 @@ if __name__ == "__main__":
         sys.argv.remove("--pretty")
         indent = 4
     else:
-        indent = None  # type: ignore
+        indent = 0
 
     # parse each statement in each script provided
     for a in sys.argv[1:]:
-        with open(a) as f:
-            for q in sqlparse.split(f.read()):
-                q = clean_query(q)
+        with pathlib.Path(a).open() as f:
+            for rq in sqlparse.split(f.read()):
+                q = clean_query(rq)
                 q = clean_functions(q)
                 p = split_query(q)
                 t = fetch_dependencies(p)
 
             # output
-            print(json.dumps(t, indent=indent))
+            sys.stdout.write(json.dumps(t, indent=indent if indent else None))
