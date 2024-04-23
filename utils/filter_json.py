@@ -25,14 +25,18 @@ Example
 $ python script.py fact_thing dependencies.json
 $ python script.py dim_whatever file1.json file2.json file3.json
 ```
+
 """
 
 import json
+import pathlib
 import sys
 
 
 def filter_json(
-    name: str, objects: dict[str, list[str]], _objects: dict[str, list[str]] = {}
+    name: str,
+    objects: dict[str, list[str]],
+    _objects: dict[str, list[str]] | None = None,
 ) -> dict[str, list[str]]:
     r"""Fetch all objects related to a single object, regardless of the depth.
 
@@ -49,17 +53,20 @@ def filter_json(
     -------
     : dict[str, list[str]]
         Filtered list of upstream and downstream dependencies.
+
     """
+    _objects = {} if _objects is None else _objects
+
     included: list[str] = []
 
     # filter until the size of the list does not change anymore
-    N = 1e99
-    while N != len(included):
-        N = len(included)
+    maxn = 1e99
+    while len(included) != maxn:
+        maxn = len(included)
 
         # run through all the nodes
         # expensive if a lot of objects are involved
-        for n, deps in objects:
+        for n, deps in objects.items():
             if n == name or n in included:
                 for d in deps:
                     if d not in included:
@@ -79,8 +86,8 @@ if __name__ == "__main__":
 
     # convert ecah provided file
     for a in sys.argv[2:]:
-        with open(a) as f:
-            o = filter_json(n, a, o)
+        with pathlib.Path(a).open() as f:
+            o = filter_json(a, o)
 
     # filter
-    print(json.dumps(o))
+    sys.stdout.write(json.dumps(o))

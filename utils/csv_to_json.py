@@ -23,13 +23,15 @@ Example
 $ python script.py dependencies.csv
 $ python script.py file1.csv file2.csv file3.csv
 ```
+
 """
 
 import json
+import pathlib
 import sys
 
 
-def to_json(content: str, objects: dict[str, list[str]]) -> tuple[str, list[str]]:
+def to_json(content: str, objects: dict[str, list[str]]) -> dict[str, list[str]]:
     r"""Convert the CSV content to JSON.
 
     Parameters
@@ -48,6 +50,7 @@ def to_json(content: str, objects: dict[str, list[str]]) -> tuple[str, list[str]
     -----
     Expects a two columns dataset, each line embedding a `object1,object2` pair; the
     second object is expected to be depended upon.
+
     """
     for r in content.split("\n"):
         if len(r.strip()):
@@ -67,8 +70,8 @@ if __name__ == "__main__":
 
     # parse each file
     for a in sys.argv[1:]:
-        with open(a) as f:
+        with pathlib.Path(a).open() as f:
             o = to_json(f.read(), o)
 
     # output
-    print(json.dumps(o))
+    sys.stdout.write(json.dumps(o))

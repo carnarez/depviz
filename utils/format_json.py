@@ -22,9 +22,11 @@ Example
 $ python script.py dependencies.json
 $ python script.py file1.json file2.json file3.json
 ```
+
 """
 
 import json
+import pathlib
 import sys
 
 
@@ -40,6 +42,7 @@ def to_dot(objects: dict[str, list[str]]) -> str:
     -------
     : str
         `DOT` diagram.
+
     """
     d = ""
 
@@ -83,6 +86,7 @@ def to_mmd(objects: dict[str, list[str]]) -> str:
     -------
     : str
         `Mermaid` diagram.
+
     """
     # always top-bottom, manually change it if you want
     d = "graph TB\n"
@@ -126,9 +130,10 @@ if __name__ == "__main__":
 
     # crash and burn
     if func is None:
-        raise NotImplementedError("No known syntax provided.")
+        msg = "No known syntax provided"
+        raise NotImplementedError(msg)
 
     # convert each provided file
     for a in sys.argv[1:]:
-        with open(a) as f:
-            print(func(json.loads(f.read())))
+        with pathlib.Path(a).open() as f:
+            sys.stdout.write(func(json.loads(f.read())))
